@@ -13,3 +13,11 @@ flowchart TD
 ```
 
 ## Overview
+
+## Tech stack
+Make table
+
+Language: C# (.NET), Typescript (React)
+DB: PostgreSQL
+DB manager: Beekeeper studio
+DB structure decisions: TPT (Table per Type), one base table that subtables inherent from
