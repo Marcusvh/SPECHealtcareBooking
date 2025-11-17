@@ -13,5 +13,7 @@ namespace HealthcareModels.Models
         public string Region { get; set; }
         public string PostalCode { get; set; }
         public string Country { get; set; }
+        public string? FullAddress => $"{City}, {Region} {PostalCode}, {Country}";
+
     }
 }

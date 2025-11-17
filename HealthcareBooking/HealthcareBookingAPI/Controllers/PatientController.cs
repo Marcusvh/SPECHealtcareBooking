@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HealthcareBookingAPI.Context;
+using HealthcareBookingAPI.Interfaces;
+using HealthcareBookingAPI.Managers;
+using HealthcareModels.Models;
+using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -8,11 +12,16 @@ namespace HealthcareBookingAPI.Controllers
     [ApiController]
     public class PatientController : ControllerBase
     {
+        private readonly IPatient patientManager;
+        public PatientController(IPatient patient)
+        {
+            patientManager = patient;
+        }
         // GET: api/<PatientController>
         [HttpGet]
-        public IEnumerable<string> Get()
+        public async Task<ActionResult<List<Patient>>> GetAllPatients()
         {
-            return new string[] { "value1", "value2" };
+            return await patientManager.GetAllPatients();
         }
 
         // GET api/<PatientController>/5

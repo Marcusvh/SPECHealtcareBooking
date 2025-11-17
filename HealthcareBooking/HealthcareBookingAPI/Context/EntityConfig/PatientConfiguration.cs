@@ -27,6 +27,9 @@ public class PatientConfiguration : IEntityTypeConfiguration<Patient>
         builder.Property(p => p.Address)
             .HasMaxLength(250);
 
+        builder.Property(p => p.DateOfBirth)
+            .HasPrecision(0);
+
         builder.Property(p => p.PreferredContactMethod)
             .HasConversion<string>()
             .HasMaxLength(50)
