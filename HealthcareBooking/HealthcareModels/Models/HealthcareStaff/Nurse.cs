@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace HealthcareModels.Models.HealthcareStaff
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum ShiftType { Day, Night, Rotating }
     public class Nurse : Staff
     {
