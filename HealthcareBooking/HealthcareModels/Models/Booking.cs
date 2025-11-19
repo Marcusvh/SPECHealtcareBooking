@@ -13,7 +13,7 @@ namespace HealthcareModels.Models
         NoShow
     }
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum CheckStage
+    public enum BookingCheckStage
     {
         First,
         Second,
@@ -26,15 +26,16 @@ namespace HealthcareModels.Models
 
         public DateTime StartTime { get; set; }
         public DateTime? EndTime { get; set; }
-        public string BookingType { get; set; }
         public string? PatientNotes { get; set; }
         public string? StaffNotes { get; set; }
         public BookingStatus Status { get; set; } = BookingStatus.Scheduled;
-        public CheckStage CheckStage { get; set; } = CheckStage.First;
-        public Guid StaffConfirmedAt { get; set; }
-        public DateTime ConfirmedByStaffId { get; set; }
+        public BookingCheckStage BookingCheckStage { get; set; } = BookingCheckStage.First;
+        public DateTime? StaffConfirmedAt { get; set; }
+        public Guid? ConfirmedByStaffId { get; set; }
 
         // References
+        public Guid BookingTypeId { get; set; }
+        public BookingType BookingType { get; set; }
         public Guid PatientId { get; set; }
         public Patient Patient { get; set; }
         public Guid StaffId { get; set; }

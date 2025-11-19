@@ -11,7 +11,7 @@ namespace HealthcareBookingAPI.DataGeneration
         {
             _context = context;
         }
-        public Faker<Patient> Create(Guid? fixedLocationId = null)
+        public Faker<Patient> GeneratePatient(Guid? fixedLocationId = null)
         {
             var faker = new Faker<Patient>("nb_NO");
             List<Location> locations = _context.Locations.ToList();                

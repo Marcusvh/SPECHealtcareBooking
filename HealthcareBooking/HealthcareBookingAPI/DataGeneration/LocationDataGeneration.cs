@@ -3,9 +3,9 @@ using HealthcareModels.Models;
 
 namespace HealthcareBookingAPI.DataGeneration
 {
-    public static class LocationDataGeneration
+    public class LocationDataGeneration
     {
-        public static Faker<Location> Create()
+        public Faker<Location> GenerateLocation()
         {
             // Set locale to Danish
             var faker = new Faker("nb_NO");

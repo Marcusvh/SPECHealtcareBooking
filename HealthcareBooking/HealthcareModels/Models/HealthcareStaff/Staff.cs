@@ -21,7 +21,7 @@ namespace HealthcareModels.Models.HealthcareStaff
         public string Name { get; set; }
         public string Description { get; set; }
         public StaffType Type { get; set; } // doctor, nurse, medicine students
-        public List<string> SupportBookings { get; set; } = new();
+        public List<BookingType> SupportedBookingTypes { get; set; } = new();
 
     }
 }
