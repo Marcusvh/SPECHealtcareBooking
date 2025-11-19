@@ -18,6 +18,10 @@ flowchart TD
 Make table
 
 Language: C# (.NET), Typescript (React)
+Projects:
+- Restful web api
+- Class library 
 DB: PostgreSQL
 DB manager: Beekeeper studio
 DB structure decisions: TPT (Table per Type), one base table that subtables inherent from
+Data generation: Faker (bogus)
