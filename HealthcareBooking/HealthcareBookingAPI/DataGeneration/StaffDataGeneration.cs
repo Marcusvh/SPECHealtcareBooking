@@ -11,27 +11,38 @@ namespace HealthcareBookingAPI.DataGeneration
         private readonly HealthcareContext _context;
         private readonly List<BookingType> _bookingTypes;
 
-        private readonly string[] DoctorSpecialties =
-        {
-            "Cardiology", "Dermatology", "Neurology", "General Medicine",
-            "Pediatrics", "Orthopedics", "Psychiatry", "Oncology"
-        };
-
         private readonly string[] NurseCertifications =
         {
             "BLS", "ACLS", "PALS", "TNCC", "ENPC", "CPN", "CCRN"
         };
 
-        private readonly string[] Departments =
+        private readonly Dictionary<string, string> SpecialtyDepartmentMap = new Dictionary<string, string>
         {
-            "Emergency", "ICU", "Pediatrics", "Surgery", "Dermatology",
-            "General Medicine", "Orthopedics"
+            { "Cardiology", "Cardiology" },
+            { "Dermatology", "Dermatology" },
+            { "Neurology", "Neurology" },
+            { "General Medicine", "General Medicine" },
+            { "Pediatrics", "Pediatrics" },
+            { "Orthopedics", "Orthopedics" },
+            { "Psychiatry", "Psychiatry" },
+            { "Oncology", "Oncology" },
+            { "Emergency Medicine", "Emergency" },
+            { "Surgery", "Surgery" },
+            { "Gastroenterology", "Gastroenterology" },
+            { "Endocrinology", "Endocrinology" },   
+            { "Nephrology", "Nephrology" },
+            { "Urology", "Urology" },
+            { "Ophthalmology", "Ophthalmology" },
+            { "ENT", "ENT" },
+            { "Rheumatology", "Rheumatology" },
+            { "Hematology", "Hematology" },
+            { "Pulmonology", "Pulmonology" }
         };
 
         public StaffDataGeneration(HealthcareContext context)
         {
             _context = context;
-            _bookingTypes = _context.BookingTypes.ToList();
+            _bookingTypes = context.BookingTypes.ToList();
         }
 
         private List<BookingType> PickRandomBookingTypes(int amount)
@@ -67,19 +78,31 @@ namespace HealthcareBookingAPI.DataGeneration
         // -----------------------------
         public Faker<Doctor> GenerateDoctor()
         {
-            return new Faker<Doctor>("nb_NO")
+            return new Faker<Doctor>()
                 .RuleFor(d => d.StaffId, f => Guid.NewGuid())
                 .RuleFor(d => d.Name, f => $"Dr. {f.Name.FullName()}")
                 .RuleFor(d => d.Description, f => f.Lorem.Paragraph())
                 .RuleFor(d => d.Type, f => StaffType.Doctor)
-                .RuleFor(d => d.Specialties, f => f.PickRandom(DoctorSpecialties))
-                .RuleFor(d => d.MedicalLincenseNumber, f => $"LIC-{f.Random.Number(100000, 999999)}")
-                .RuleFor(d => d.YearsOfExperience, f => f.Random.Int(1, 40))
-                .RuleFor(d => d.IsAcceptingNewPatients, f => f.Random.Bool())
-                .RuleFor(d => d.AssignedDepartment, f => f.PickRandom(Departments))
+                .RuleFor(d => d.Specialties, (f, d) =>
+                {
+                    // Pick a random specialty
+                    string specialty = f.PickRandom(SpecialtyDepartmentMap.Keys.ToList());
+
+                    // Assign the matching department
+                    d.AssignedDepartment = SpecialtyDepartmentMap[specialty];
+
+                    return specialty;
+                })
+                .RuleFor(d => d.MedicalLincenseNumber,
+                    f => $"LIC-{f.Random.Number(100000, 999999)}")
+                .RuleFor(d => d.YearsOfExperience,
+                    f => f.Random.Int(1, 40))
+                .RuleFor(d => d.IsAcceptingNewPatients,
+                    f => f.Random.Bool())
                 .RuleFor(d => d.SupportedBookingTypes,
                     f => PickRandomBookingTypes(f.Random.Int(1, 4)));
         }
+
         // -----------------------------
         // Nurse faker
         // -----------------------------
@@ -92,7 +115,7 @@ namespace HealthcareBookingAPI.DataGeneration
                 .RuleFor(n => n.Type, f => StaffType.Nurse)
                 .RuleFor(n => n.NursingLevel, f => f.PickRandom("RN", "LPN", "NP", "CNS"))
                 .RuleFor(n => n.Certification, f => f.PickRandom(NurseCertifications, f.Random.Int(1, 4)).ToList())
-                .RuleFor(n => n.AssignedDepartment, f => f.PickRandom(Departments))
+                .RuleFor(n => n.AssignedDepartment, f => f.PickRandom(SpecialtyDepartmentMap.Keys.ToList()))
                 .RuleFor(n => n.ShiftType, f => f.PickRandom<ShiftType>())
                 .RuleFor(n => n.YearsOfExperience, f => f.Random.Int(0, 30))
                 .RuleFor(n => n.SupportedBookingTypes,
@@ -115,7 +138,7 @@ namespace HealthcareBookingAPI.DataGeneration
                 .RuleFor(ms => ms.University, f => f.Company.CompanyName() + " Medical School")
                 .RuleFor(ms => ms.YearOfStudy, f => f.Random.Int(1, 6))
                 .RuleFor(ms => ms.SupervisorId, f => f.PickRandom(doctorID))
-                .RuleFor(ms => ms.InternshipStartDate, f => f.Date.Past(1).ToUniversalTime())
+                .RuleFor(ms => ms.InternshipStartDate, f => f.Date.PastDateOnly(1))
                 .RuleFor(ms => ms.InternshipEndDate, (f, ms) => ms.InternshipStartDate.AddMonths(f.Random.Int(3, 12)))
                 .RuleFor(ms => ms.SupportedBookingTypes,
                     f => PickRandomBookingTypes(f.Random.Int(1, 4)));

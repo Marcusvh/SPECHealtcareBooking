@@ -101,23 +101,23 @@ namespace HealthcareBookingAPI.Controllers
             return $"Generated {amount} booking";
         }
         [HttpPost("staffPatientsLocations")]
-        public string GenerateStaffPatientsLocations([FromBody] DataGenerationStaffPatientsLocationsDTO dto)
+        public async Task<string> GenerateStaffPatientsLocations([FromBody] DataGenerationStaffPatientsLocationsDTO dto)
         {
-            _dataGenerationFacade.GenerateStaffPatientsLocations(dto);
+            await _dataGenerationFacade.GenerateStaffPatientsLocations(dto);
 
             return
                 $"Generated:\n" +
                 $"- {dto.NumLocation} locations\n" +
                 $"- {dto.NumPatient} patients\n" +
-                $"- {dto.NumStaff} staff (Doctors: {dto.NumDoctor}, Nurses: {dto.NumNurse}, MedStudents: {dto.NumMedStudent})\n" +
+                $"- {dto.NumDoctor + dto.NumNurse + dto.NumMedStudent} staff (Doctors: {dto.NumDoctor}, Nurses: {dto.NumNurse}, MedStudents: {dto.NumMedStudent})\n" +
                 (dto.FixedLocationId != null
                     ? $"- Fixed location assigned: {dto.FixedLocationId}"
                     : "- No fixed location ID provided");
         }
         [HttpPost("allBookings")]
-        public string GenerateBookings([FromBody] DataGenerationBookingsDTO dto)
+        public async Task<string> GenerateBookings([FromBody] DataGenerationBookingsDTO dto)
         {
-            _dataGenerationFacade.GenerateBookings(dto);
+            await _dataGenerationFacade.GenerateBookings(dto);
 
             return
                 "Generated:\n" +
@@ -125,17 +125,17 @@ namespace HealthcareBookingAPI.Controllers
                 $"- {dto.NumBooking} bookings";
         }
         [HttpPost("allData")]
-        public string GenerateAllData([FromBody] DataGenerationAllDTO dto)
+        public async Task<string> GenerateAllData([FromBody] DataGenerationAllDTO dto)
         {
-            _dataGenerationFacade.GenerateAllData(dto);
+            await _dataGenerationFacade.GenerateAllData(dto);
 
             return
                 $"Generated:\n" +
-                $"- {dto.NumBookingType} booking types\n " +
-                $"- {dto.NumBooking} bookings" +
+                $"- {dto.NumBookingType} booking types\n" +
+                $"- {dto.NumBooking} bookings\n" +
                 $"- {dto.NumLocation} locations\n" +
                 $"- {dto.NumPatient} patients\n" +
-                $"- {dto.NumStaff} staff (Doctors: {dto.NumDoctor}, Nurses: {dto.NumNurse}, MedStudents: {dto.NumMedStudent})\n" +
+                $"- {dto.NumDoctor + dto.NumNurse + dto.NumMedStudent} staff (Doctors: {dto.NumDoctor}, Nurses: {dto.NumNurse}, MedStudents: {dto.NumMedStudent})\n" +
                 (dto.FixedLocationId != null
                     ? $"- Fixed location assigned: {dto.FixedLocationId}"
                     : "- No fixed location ID provided");

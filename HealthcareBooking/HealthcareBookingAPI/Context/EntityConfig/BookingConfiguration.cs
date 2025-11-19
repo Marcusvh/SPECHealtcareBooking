@@ -32,7 +32,6 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .HasMaxLength(50)
             .IsRequired();
 
-        // These look swapped but I will configure them as-is:
         builder.Property(b => b.StaffConfirmedAt)
             .IsRequired()
             .HasPrecision(0);
@@ -45,7 +44,8 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .HasPrecision(0)
             .IsRequired();
 
-        builder.Property(b => b.UpdatedAt);
+        builder.Property(b => b.UpdatedAt)
+            .HasPrecision(0);
 
         // ----------------------------
         // Relationships

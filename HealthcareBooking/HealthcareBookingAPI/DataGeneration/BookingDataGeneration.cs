@@ -36,7 +36,18 @@ namespace HealthcareBookingAPI.DataGeneration
                 .RuleFor(b => b.PatientNotes, f => f.Lorem.Sentence())
                 .RuleFor(b => b.StaffNotes, f => f.Lorem.Sentence())
                 .RuleFor(b => b.Status, f => f.PickRandom<BookingStatus>())
-                .RuleFor(b => b.BookingCheckStage, f => f.PickRandom<BookingCheckStage>())
+                .RuleFor(b => b.BookingCheckStage, (f, b) =>
+                {
+                    // Conditional logic based on Status
+                    return b.Status switch
+                    {
+                        BookingStatus.Cancelled => BookingCheckStage.Cancelled,
+                        BookingStatus.Completed => BookingCheckStage.Confirmed,
+                        BookingStatus.NoShow => BookingCheckStage.Confirmed,
+                        BookingStatus.Scheduled => f.PickRandom(new[] { BookingCheckStage.First, BookingCheckStage.Second, BookingCheckStage.Confirmed }),
+                        _ => BookingCheckStage.First // fallback
+                    };
+                })
                 .RuleFor(b => b.StaffConfirmedAt, f => f.Date.Recent().ToUniversalTime())
                 .RuleFor(b => b.ConfirmedByStaffId, f => f.PickRandom(staffMembers).StaffId)
                 .RuleFor(b => b.Patient, f => f.PickRandom(patients))

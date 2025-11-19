@@ -8,43 +8,54 @@ namespace HealthcareBookingAPI.DataGeneration
     public class DataGenerationFacade
     {
         private readonly HealthcareContext _context;
-        private readonly StaffDataGeneration _staffDataGeneration;
+        private StaffDataGeneration _staffDataGeneration;
         private readonly PatientDataGeneration _patientDataGeneration;
         private readonly LocationDataGeneration _locationDataGeneration;
         private readonly BookingDataGeneration _bookingDataGeneration;
         public DataGenerationFacade(HealthcareContext context)
         {
             _context = context;
-            _staffDataGeneration = new(context);
+            
             _patientDataGeneration = new(context);
             _bookingDataGeneration = new(context);
             _locationDataGeneration = new();
         }
-        public async void GenerateStaffPatientsLocations(DataGenerationStaffPatientsLocationsDTO dto) 
+        public async Task GenerateStaffPatientsLocations(DataGenerationStaffPatientsLocationsDTO dto) 
         {
+            _staffDataGeneration = new(_context);
             List<Location> locations = _locationDataGeneration.GenerateLocation().Generate(dto.NumLocation);
+            await _context.Locations.AddRangeAsync(locations);
+            await _context.SaveChangesAsync();
+
             List<Patient> patients = _patientDataGeneration.GeneratePatient(dto.FixedLocationId).Generate(dto.NumPatient);
             List<Staff> staffs = _staffDataGeneration.GenerateStaff().Generate(dto.NumStaff);
+
             List<Doctor> doctors = _staffDataGeneration.GenerateDoctor().Generate(dto.NumDoctor);
+            await _context.Doctors.AddRangeAsync(doctors);
+            await _context.SaveChangesAsync();
+
             List<Nurse> nurses = _staffDataGeneration.GenerateNurse().Generate(dto.NumNurse);
             List<MedicalStudent> medStudent = _staffDataGeneration.GenerateMedStudent().Generate(dto.NumMedStudent);
 
-            _context.Locations.AddRange(locations);
-            _context.Patients.AddRange(patients);
-            _context.Staffs.AddRange(staffs);
-            _context.Doctors.AddRange(doctors);
-            _context.Nurses.AddRange(nurses);
-            _context.MedicalStudents.AddRange(medStudent);
+            await _context.Patients.AddRangeAsync(patients);
+            await _context.Staffs.AddRangeAsync(staffs);
+            await _context.Nurses.AddRangeAsync(nurses);
+            await _context.MedicalStudents.AddRangeAsync(medStudent);
             await _context.SaveChangesAsync();
         }
-        public void GenerateBookings(DataGenerationBookingsDTO dto) 
+        public async Task GenerateBookings(DataGenerationBookingsDTO dto) 
         {
-            _bookingDataGeneration.GenerateBookingType().Generate(dto.NumBookingType);
-            _bookingDataGeneration.GenerateBooking().Generate(dto.NumBooking);
+            List<BookingType> bookingTypes = _bookingDataGeneration.GenerateBookingType().Generate(dto.NumBookingType);
+            List<Booking> bookings = _bookingDataGeneration.GenerateBooking().Generate(dto.NumBooking);
+
+            await _context.BookingTypes.AddRangeAsync(bookingTypes);
+            await _context.Bookings.AddRangeAsync(bookings);
+
+            await _context.SaveChangesAsync();
         }
-        public void GenerateAllData(DataGenerationAllDTO dto)
+        public async Task GenerateAllData(DataGenerationAllDTO dto)
         {
-            DataGenerationStaffPatientsLocationsDTO splDTO = new DataGenerationStaffPatientsLocationsDTO()
+            DataGenerationStaffPatientsLocationsDTO splDTO = new()
             {
                 FixedLocationId = dto.FixedLocationId,
                 NumDoctor = dto.NumDoctor,
@@ -54,9 +65,16 @@ namespace HealthcareBookingAPI.DataGeneration
                 NumPatient = dto.NumPatient,
                 NumStaff = dto.NumStaff,
             };
-            _bookingDataGeneration.GenerateBookingType().Generate(dto.NumBookingType);
-            GenerateStaffPatientsLocations(splDTO);
-            _bookingDataGeneration.GenerateBooking().Generate(dto.NumBooking);
+
+            List<BookingType> bookingTypes = _bookingDataGeneration.GenerateBookingType().Generate(dto.NumBookingType);
+            await _context.BookingTypes.AddRangeAsync(bookingTypes);
+            await _context.SaveChangesAsync();
+
+            await GenerateStaffPatientsLocations(splDTO);
+
+            List<Booking> bookings = _bookingDataGeneration.GenerateBooking().Generate(dto.NumBooking);
+            await _context.Bookings.AddRangeAsync(bookings);
+            await _context.SaveChangesAsync();
         }
     }
 }

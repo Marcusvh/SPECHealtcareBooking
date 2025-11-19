@@ -11,7 +11,7 @@ namespace HealthcareModels.Models.HealthcareStaff
         public string University { get; set; }
         public int YearOfStudy { get; set; }
         public Guid SupervisorId { get; set; }
-        public DateTime InternshipStartDate { get; set; }
-        public DateTime InternshipEndDate { get; set; }
+        public DateOnly InternshipStartDate { get; set; }
+        public DateOnly InternshipEndDate { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using HealthcareModels.Models;
+﻿using HealthcareBookingAPI.Configurations;
+using HealthcareModels.Models;
 using HealthcareModels.Models.HealthcareStaff;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,16 +21,6 @@ namespace HealthcareBookingAPI.Context
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<BookingType> BookingTypes { get; set; }
 
-        //protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
-        //{
-        //    configurationBuilder.Properties<DateTime>()
-        //        .HaveColumnType("timestamp without time zone");
-
-        //    configurationBuilder.Properties<DateTime?>()
-        //        .HaveColumnType("timestamp without time zone");
-        //    base.ConfigureConventions(configurationBuilder);
-        //}
-
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //PATIENT
@@ -39,6 +30,8 @@ namespace HealthcareBookingAPI.Context
             //STAFF
             modelBuilder.ApplyConfiguration(new StaffConfiguration());
             modelBuilder.ApplyConfiguration(new DoctorConfiguration());
+            modelBuilder.ApplyConfiguration(new NurseConfiguration());
+            modelBuilder.ApplyConfiguration(new MedicalStudentConfiguration());
 
             //BOOKING
             modelBuilder.ApplyConfiguration(new BookingTypeConfiguration());
