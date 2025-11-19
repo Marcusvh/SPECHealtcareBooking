@@ -25,7 +25,7 @@ namespace HealthcareBookingAPI.DataGeneration
             // Load related entities from DB
             List<Patient> patients = _context.Patients.ToList();
             List<Staff> staffMembers = _context.Staffs.ToList();
-            List<BookingType> bookingTypes = _context.bookingTypes.ToList();
+            List<BookingType> bookingTypes = _context.BookingTypes.ToList();
 
             var faker = new Faker<Booking>("nb_NO");
 

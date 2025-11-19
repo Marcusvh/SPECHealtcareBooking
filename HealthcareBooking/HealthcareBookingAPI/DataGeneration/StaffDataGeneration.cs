@@ -31,7 +31,7 @@ namespace HealthcareBookingAPI.DataGeneration
         public StaffDataGeneration(HealthcareContext context)
         {
             _context = context;
-            _bookingTypes = _context.bookingTypes.ToList();
+            _bookingTypes = _context.BookingTypes.ToList();
         }
 
         private List<BookingType> PickRandomBookingTypes(int amount)
