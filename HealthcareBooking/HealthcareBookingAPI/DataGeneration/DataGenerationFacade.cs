@@ -35,7 +35,9 @@ namespace HealthcareBookingAPI.DataGeneration
             await _context.SaveChangesAsync();
 
             List<Nurse> nurses = _staffDataGeneration.GenerateNurse().Generate(dto.NumNurse);
-            List<MedicalStudent> medStudent = _staffDataGeneration.GenerateMedStudent().Generate(dto.NumMedStudent);
+
+            List<Guid> doctorIds = _context.Doctors.Select(o => o.StaffId).ToList();
+            List<MedicalStudent> medStudent = _staffDataGeneration.GenerateMedStudent(doctorIds).Generate(dto.NumMedStudent);
 
             await _context.Patients.AddRangeAsync(patients);
             await _context.Staffs.AddRangeAsync(staffs);
@@ -45,7 +47,7 @@ namespace HealthcareBookingAPI.DataGeneration
         }
         public async Task GenerateBookings(DataGenerationBookingsDTO dto) 
         {
-            List<BookingType> bookingTypes = _bookingDataGeneration.GenerateBookingType().Generate(dto.NumBookingType);
+            List<BookingType> bookingTypes = _bookingDataGeneration.GenerateBookingType(dto.NumBookingType);
             List<Booking> bookings = _bookingDataGeneration.GenerateBooking().Generate(dto.NumBooking);
 
             await _context.BookingTypes.AddRangeAsync(bookingTypes);
@@ -66,7 +68,7 @@ namespace HealthcareBookingAPI.DataGeneration
                 NumStaff = dto.NumStaff,
             };
 
-            List<BookingType> bookingTypes = _bookingDataGeneration.GenerateBookingType().Generate(dto.NumBookingType);
+            List<BookingType> bookingTypes = _bookingDataGeneration.GenerateBookingType(dto.NumBookingType);
             await _context.BookingTypes.AddRangeAsync(bookingTypes);
             await _context.SaveChangesAsync();
 

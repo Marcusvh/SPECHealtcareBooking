@@ -21,7 +21,7 @@ namespace HealthcareBookingAPI.DataGeneration
                 .RuleFor(p => p.FullName, f => f.Name.FullName())
                 .RuleFor(p => p.Email, (f, p) => f.Internet.Email(p.FullName))
                 .RuleFor(p => p.Phone, f => f.Phone.PhoneNumber("+47 ## ## ## ##"))
-                .RuleFor(p => p.DateOfBirth, f => f.Date.Past(80, DateTime.Today.AddYears(-18)).ToUniversalTime())
+                .RuleFor(p => p.DateOfBirth, f => f.Date.PastDateOnly(80, DateOnly.FromDateTime(DateTime.Today.AddYears(-18))))
                 .RuleFor(p => p.Address, f => f.Address.StreetAddress())
                 .RuleFor(p => p.PreferredContactMethod, f => f.PickRandom<ContactMethod>())
                 .RuleFor(p => p.Location, f =>

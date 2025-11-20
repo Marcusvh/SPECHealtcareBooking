@@ -79,7 +79,8 @@ namespace HealthcareBookingAPI.Controllers
         [HttpPost("medStudent")]
         public async Task<string> GenerateMedStudent([FromBody] int amount = 1)
         {
-            List<MedicalStudent> medStudent= _staffDataGeneration.GenerateMedStudent().Generate(amount);
+            List<Guid> doctorIds = _context.Doctors.Select(o => o.StaffId).ToList();
+            List<MedicalStudent> medStudent= _staffDataGeneration.GenerateMedStudent(doctorIds).Generate(amount);
             _context.MedicalStudents.AddRange(medStudent);
             await _context.SaveChangesAsync();
             return $"Generated {amount} medical students";
@@ -87,7 +88,8 @@ namespace HealthcareBookingAPI.Controllers
         [HttpPost("bookingType")]
         public async Task<string> GenerateBookingType([FromBody] int amount = 1)
         {
-            List<BookingType> bookingType = _bookingDataGeneration.GenerateBookingType().Generate(amount);
+            // works a bit to wild
+            List<BookingType> bookingType = _bookingDataGeneration.GenerateBookingType(amount);
             _context.BookingTypes.AddRange(bookingType);
             await _context.SaveChangesAsync();
             return $"Generated {amount} booking types";

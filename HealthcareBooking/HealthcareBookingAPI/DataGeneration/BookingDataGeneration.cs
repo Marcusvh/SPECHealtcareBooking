@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using HealthcareBookingAPI.Context;
+using HealthcareBookingAPI.DataGeneration.Helpers;
 using HealthcareModels.Models;
 using HealthcareModels.Models.HealthcareStaff;
 
@@ -13,12 +14,14 @@ namespace HealthcareBookingAPI.DataGeneration
         {
             _context = context;
         }
-        public Faker<BookingType> GenerateBookingType()
+        public List<BookingType> GenerateBookingType(int numBookingTypes) // later implement limit and conflict 
         {
-            return new Faker<BookingType>()
-                .RuleFor(bt => bt.BookingTypeId, f => Guid.NewGuid())
-                .RuleFor(bt => bt.Name, f => f.Commerce.ProductName())
-                .RuleFor(bt => bt.Description, f => f.Lorem.Sentence());
+            List<BookingType> list = new List<BookingType>();
+            foreach (var item in GenerateStaticMedicalBookingTypeData.MedicalBookingTypes)
+            {
+                list.Add(new BookingType() { BookingTypeId = new Guid(), Description = item.Description, Name = item.Name });
+            }
+            return list;
         }
         public Faker<Booking> GenerateBooking()
         {

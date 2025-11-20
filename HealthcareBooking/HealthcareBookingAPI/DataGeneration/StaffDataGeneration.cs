@@ -1,5 +1,6 @@
 ﻿using Bogus;
 using HealthcareBookingAPI.Context;
+using HealthcareBookingAPI.DataGeneration.Helpers;
 using HealthcareModels.Models;
 using HealthcareModels.Models.HealthcareStaff;
 using System.Linq;
@@ -10,39 +11,31 @@ namespace HealthcareBookingAPI.DataGeneration
     {
         private readonly HealthcareContext _context;
         private readonly List<BookingType> _bookingTypes;
-
+        private readonly List<MedicalBookingType> _medicalBookingTypes;
         private readonly string[] NurseCertifications =
         {
             "BLS", "ACLS", "PALS", "TNCC", "ENPC", "CPN", "CCRN"
         };
 
-        private readonly Dictionary<string, string> SpecialtyDepartmentMap = new Dictionary<string, string>
+        public readonly Dictionary<string, string> SpecialtyDepartmentMap = new()
         {
-            { "Cardiology", "Cardiology" },
-            { "Dermatology", "Dermatology" },
-            { "Neurology", "Neurology" },
-            { "General Medicine", "General Medicine" },
-            { "Pediatrics", "Pediatrics" },
-            { "Orthopedics", "Orthopedics" },
-            { "Psychiatry", "Psychiatry" },
-            { "Oncology", "Oncology" },
-            { "Emergency Medicine", "Emergency" },
-            { "Surgery", "Surgery" },
-            { "Gastroenterology", "Gastroenterology" },
-            { "Endocrinology", "Endocrinology" },   
-            { "Nephrology", "Nephrology" },
-            { "Urology", "Urology" },
-            { "Ophthalmology", "Ophthalmology" },
-            { "ENT", "ENT" },
-            { "Rheumatology", "Rheumatology" },
-            { "Hematology", "Hematology" },
-            { "Pulmonology", "Pulmonology" }
+            ["General Medicine"] = "General Medicine",
+            ["Family Medicine"] = "General Medicine",
+            ["Cardiology"] = "Cardiology",
+            ["Dermatology"] = "Dermatology",
+            ["Neurology"] = "Neurology",
+            ["Pediatrics"] = "Pediatrics",
+            ["Orthopedics"] = "Orthopedics",
+            ["Psychiatry"] = "Psychiatry",
+            ["Oncology"] = "Oncology"
         };
+
 
         public StaffDataGeneration(HealthcareContext context)
         {
             _context = context;
             _bookingTypes = context.BookingTypes.ToList();
+            _medicalBookingTypes = GenerateStaticMedicalBookingTypeData.MedicalBookingTypes;
         }
 
         private List<BookingType> PickRandomBookingTypes(int amount)
@@ -78,29 +71,35 @@ namespace HealthcareBookingAPI.DataGeneration
         // -----------------------------
         public Faker<Doctor> GenerateDoctor()
         {
+            var specList = SpecialtyDepartmentMap.Keys.ToList();
+
             return new Faker<Doctor>()
                 .RuleFor(d => d.StaffId, f => Guid.NewGuid())
                 .RuleFor(d => d.Name, f => $"Dr. {f.Name.FullName()}")
-                .RuleFor(d => d.Description, f => f.Lorem.Paragraph())
+                .RuleFor(d => d.Description, f => f.Lorem.Sentence())
                 .RuleFor(d => d.Type, f => StaffType.Doctor)
-                .RuleFor(d => d.Specialties, (f, d) =>
+                .RuleFor(d => d.Specialties, f => f.PickRandom(specList))
+                .RuleFor(d => d.AssignedDepartment, (f, d) => SpecialtyDepartmentMap[d.Specialties])
+                .RuleFor(d => d.MedicalLincenseNumber, f => $"LIC-{f.Random.Number(100000, 999999)}")
+                .RuleFor(d => d.YearsOfExperience, f => f.Random.Int(1, 35))
+                .RuleFor(d => d.IsAcceptingNewPatients, f => f.Random.Bool())
+                .RuleFor(d => d.SupportedBookingTypes, (f, d) =>
                 {
-                    // Pick a random specialty
-                    string specialty = f.PickRandom(SpecialtyDepartmentMap.Keys.ToList());
+                    // Step 1: Find the *valid definition types* from your in-memory list
+                    var validNames = _medicalBookingTypes
+                        .Where(x =>
+                            x.RequiredStaffType == StaffType.Doctor &&
+                            x.AllowedSpecialties.Contains(d.Specialties))
+                        .Select(x => x.Name)
+                        .ToList();
 
-                    // Assign the matching department
-                    d.AssignedDepartment = SpecialtyDepartmentMap[specialty];
+                    // Step 2: Pull the matching BookingTypes from the DB
+                    var dbBookingTypes = _context.BookingTypes
+                        .Where(bt => validNames.Contains(bt.Name))
+                        .ToList();
 
-                    return specialty;
-                })
-                .RuleFor(d => d.MedicalLincenseNumber,
-                    f => $"LIC-{f.Random.Number(100000, 999999)}")
-                .RuleFor(d => d.YearsOfExperience,
-                    f => f.Random.Int(1, 40))
-                .RuleFor(d => d.IsAcceptingNewPatients,
-                    f => f.Random.Bool())
-                .RuleFor(d => d.SupportedBookingTypes,
-                    f => PickRandomBookingTypes(f.Random.Int(1, 4)));
+                    return dbBookingTypes;
+                });
         }
 
         // -----------------------------
@@ -108,40 +107,65 @@ namespace HealthcareBookingAPI.DataGeneration
         // -----------------------------
         public Faker<Nurse> GenerateNurse()
         {
-            return new Faker<Nurse>("nb_NO")
+            return new Faker<Nurse>()
                 .RuleFor(n => n.StaffId, f => Guid.NewGuid())
                 .RuleFor(n => n.Name, f => f.Name.FullName())
                 .RuleFor(n => n.Description, f => f.Lorem.Sentence())
                 .RuleFor(n => n.Type, f => StaffType.Nurse)
                 .RuleFor(n => n.NursingLevel, f => f.PickRandom("RN", "LPN", "NP", "CNS"))
+                .RuleFor(n => n.AssignedDepartment, f => f.PickRandom(SpecialtyDepartmentMap.Values.ToList()))
                 .RuleFor(n => n.Certification, f => f.PickRandom(NurseCertifications, f.Random.Int(1, 4)).ToList())
-                .RuleFor(n => n.AssignedDepartment, f => f.PickRandom(SpecialtyDepartmentMap.Keys.ToList()))
-                .RuleFor(n => n.ShiftType, f => f.PickRandom<ShiftType>())
-                .RuleFor(n => n.YearsOfExperience, f => f.Random.Int(0, 30))
-                .RuleFor(n => n.SupportedBookingTypes,
-                    f => PickRandomBookingTypes(f.Random.Int(1, 4)));
-        }
+                .RuleFor(n => n.YearsOfExperience, f => f.Random.Int(0, 25))
+                .RuleFor(n => n.SupportedBookingTypes, f =>
+                {
+                    // Step 1: Find the *valid definition types* from your in-memory list
+                    var validNames = _medicalBookingTypes
+                        .Where(x =>
+                            x.RequiredStaffType == StaffType.Nurse)
+                        .Select(x => x.Name)
+                        .ToList();
 
+                    // Step 2: Pull the matching BookingTypes from the DB
+                    var dbBookingTypes = _context.BookingTypes
+                        .Where(bt => validNames.Contains(bt.Name))
+                        .ToList();
+
+                    return dbBookingTypes;
+
+        });
+        }
         // -----------------------------
         // MedicalStudent faker
         // -----------------------------
-        public Faker<MedicalStudent> GenerateMedStudent()
+        public Faker<MedicalStudent> GenerateMedStudent(List<Guid> doctorIds)
         {
-            List<Guid> doctorID = new List<Guid>();
-            doctorID = _context.Doctors.Select(o => o.StaffId).ToList();
-
-            return new Faker<MedicalStudent>("nb_NO")
+            return new Faker<MedicalStudent>()
                 .RuleFor(ms => ms.StaffId, f => Guid.NewGuid())
                 .RuleFor(ms => ms.Name, f => f.Name.FullName())
-                .RuleFor(ms => ms.Description, f => f.Lorem.Sentence())
                 .RuleFor(ms => ms.Type, f => StaffType.MedicalStudent)
-                .RuleFor(ms => ms.University, f => f.Company.CompanyName() + " Medical School")
+                .RuleFor(ms => ms.Description, f => f.Lorem.Sentence())
+                .RuleFor(ms => ms.University, f => $"{f.Company.CompanyName()} Medical School")
+                .RuleFor(ms => ms.SupervisorId, f => f.PickRandom(doctorIds))
                 .RuleFor(ms => ms.YearOfStudy, f => f.Random.Int(1, 6))
-                .RuleFor(ms => ms.SupervisorId, f => f.PickRandom(doctorID))
-                .RuleFor(ms => ms.InternshipStartDate, f => f.Date.PastDateOnly(1))
-                .RuleFor(ms => ms.InternshipEndDate, (f, ms) => ms.InternshipStartDate.AddMonths(f.Random.Int(3, 12)))
-                .RuleFor(ms => ms.SupportedBookingTypes,
-                    f => PickRandomBookingTypes(f.Random.Int(1, 4)));
+                .RuleFor(ms => ms.InternshipStartDate, f => DateOnly.FromDateTime(f.Date.Past(1)))
+                .RuleFor(ms => ms.InternshipEndDate,
+                    (f, ms) => ms.InternshipStartDate.AddMonths(f.Random.Int(3, 12)))
+                .RuleFor(ms => ms.SupportedBookingTypes, f =>
+                {
+                    var valid = _medicalBookingTypes
+                        .Where(x =>
+                            x.RequiredStaffType == StaffType.Nurse || // med students assist nurses
+                            x.RequiredStaffType == StaffType.Doctor &&
+                            x.DurationMinutes <= 20);                  // can assist in short consults
+
+                    return valid.Select(x => new BookingType
+                    {
+                        BookingTypeId = Guid.NewGuid(),
+                        Name = x.Name,
+                        Description = x.Description
+                    }).ToList();
+                });
         }
+
     }
 }
