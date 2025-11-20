@@ -1,13 +1,34 @@
-import React from "react";
-import Header from "../components/Header";
+import React, { useEffect, useState } from "react";
 import dummyDokter1 from "../assets/images/dummyDokter1.jpg";
 import dummyDokter2 from "../assets/images/dummyDokter2.png";
 import dummyPainDokter from "../assets/images/dummyPainDokter.jpg";
-import heroImg from "../assets/images/heroBanner1.jpg";
 import heroImg2 from "../assets/images/heroBanner2.jpeg";
-
+import { apiRequest } from "../apiRequest/HealthcareApi";
+import { type Doctor } from "../types/Doctor";
+interface FeaturedDoctor extends Doctor {
+    docPic: string;
+}
 const Home: React.FC = () => {
     const dokterPics = [dummyDokter1, dummyDokter2, dummyPainDokter];
+    const [featuredDokters, setFeaturedDokters] = useState<FeaturedDoctor[]>([])
+
+    useEffect(() => {
+        const loadDoctors = async () => {
+            try {
+                const data: Doctor[] = await apiRequest("staff/doctor", "GET", null, "numDoctors=3");
+                console.log(data);
+                const featured: FeaturedDoctor[] = data.map((doc, index) => ({
+                    ...doc,
+                    docPic: dokterPics[index]
+                }));
+                setFeaturedDokters(featured)
+            } catch (err) {
+                console.error(err);
+            }
+        };
+        loadDoctors();
+    }, []);
+
 
   return (
     <div className="w-full bg-gray-50 text-gray-900">
@@ -52,21 +73,21 @@ const Home: React.FC = () => {
           <h2 className="text-3xl font-bold mb-8">Featured Doctors</h2>
 
           <div className="grid grid-cols-3 gap-8">
-            {dokterPics.map((i) => (
+            {featuredDokters.map((i, index) => (
               <div
-                key={i}
+                key={index}
                 className="bg-white shadow rounded-xl p-6 hover:shadow-lg transition"
-              >
+                >
                 <img
-                  src={`${i}`}
+                  src={`${i.docPic}`}
                   alt="doctor"
                   className="w-fit mx-auto h-[50vh] h-56 object-cover rounded-lg mb-4"
                 />
 
-                <h3 className="text-xl font-semibold">Dr. Jane Doe</h3>
-                <p className="text-rose-600 font-medium">Cardiologist</p>
+                <h3 className="text-xl font-semibold">{i.name}</h3>
+                <p className="text-rose-600 font-medium">{i.specialties}</p>
                 <p className="text-sm text-gray-600 mt-2">
-                  10+ years experience • City Medical Center
+                  {i.yearsOfExperience} • {i.description}
                 </p>
 
                 <button className="mt-4 w-full bg-rose-600 text-white py-2 rounded-lg hover:bg-rose-700 transition">

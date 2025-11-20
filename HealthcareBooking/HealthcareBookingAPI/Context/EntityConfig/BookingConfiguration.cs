@@ -19,7 +19,11 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .HasMaxLength(500);
 
         builder.Property(b => b.StartTime)
+            .HasPrecision(0)
             .IsRequired();
+
+        builder.Property(b => b.EndTime)
+            .HasPrecision(0);
 
         // Enums as string
         builder.Property(b => b.Status)
@@ -33,11 +37,10 @@ public class BookingConfiguration : IEntityTypeConfiguration<Booking>
             .IsRequired();
 
         builder.Property(b => b.StaffConfirmedAt)
-            .IsRequired()
             .HasPrecision(0);
 
-        builder.Property(b => b.ConfirmedByStaffId)
-            .IsRequired();
+        builder.Property(b => b.ConfirmedByStaffId);
+            
 
         // Auditing
         builder.Property(b => b.CreatedAt)

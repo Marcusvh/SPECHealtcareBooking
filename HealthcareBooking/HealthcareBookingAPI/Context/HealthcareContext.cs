@@ -21,6 +21,12 @@ namespace HealthcareBookingAPI.Context
         public DbSet<Booking> Bookings { get; set; }
         public DbSet<BookingType> BookingTypes { get; set; }
 
+        protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+        {
+            configurationBuilder.Properties<DateTime>()
+                .HavePrecision(0);
+            base.ConfigureConventions(configurationBuilder);
+        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //PATIENT

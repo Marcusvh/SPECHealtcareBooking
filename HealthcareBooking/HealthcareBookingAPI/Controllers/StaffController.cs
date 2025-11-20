@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HealthcareBookingAPI.Interfaces;
+using HealthcareModels.Models.HealthcareStaff;
+using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -8,25 +10,36 @@ namespace HealthcareBookingAPI.Controllers
     [ApiController]
     public class StaffController : ControllerBase
     {
+        private readonly IDoctorManager _manager;
+        public StaffController(IDoctorManager manager)
+        {
+            _manager = manager;
+        }
         // GET: api/<StaffController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        [HttpGet("doctor")]
+        public async Task<ActionResult<List<Doctor>>> GetAllDoctors([FromQuery] int? numDoctors)
         {
-            return new string[] { "value1", "value2" };
+            return Ok(await _manager.GetAllDoctorsAsync(numDoctors));
         }
 
-        // GET api/<StaffController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // GET api/staff/doctor/id/{id}
+        [HttpGet("doctor/id/{id}")]
+        public async Task<ActionResult<Doctor>> GetDoctorById(Guid id)
         {
-            return "value";
+            var doctor = await _manager.GetDoctorByIdAsync(id);
+            if (doctor == null) return NotFound();
+            return Ok(doctor);
         }
 
-        // POST api/<StaffController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        // GET api/staff/doctor/name/{name}
+        [HttpGet("doctor/name/{name}")]
+        public async Task<ActionResult<Doctor>> GetDoctorByName(string name)
         {
+            var doctor = await _manager.GetDoctorByNameAsync(name);
+            if (doctor == null) return NotFound();
+            return Ok(doctor);
         }
+
 
         // PUT api/<StaffController>/5
         [HttpPut("{id}")]

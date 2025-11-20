@@ -1,4 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using HealthcareBookingAPI.DTO;
+using HealthcareBookingAPI.Interfaces;
+using HealthcareModels.Models;
+using HealthcareModels.Models.HealthcareStaff;
+using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -8,36 +12,56 @@ namespace HealthcareBookingAPI.Controllers
     [ApiController]
     public class BookingController : ControllerBase
     {
+        private readonly IBookingManager _manager;
+        public BookingController(IBookingManager manager)
+        {
+            _manager = manager;
+        }
         // GET: api/<BookingController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        [HttpGet("bookingType")]
+        public async Task<ActionResult<List<BookingType>>> GetAllBookingTypes()
         {
-            return new string[] { "value1", "value2" };
+            return Ok(await _manager.GetAllBookingTypesAsync());
         }
 
-        // GET api/<BookingController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // GET api/staff/bookingType/id/{id}
+        [HttpGet("bookingType/id/{id}")]
+        public async Task<ActionResult<BookingType>> GetBookingTypeById(Guid id)
         {
-            return "value";
+            var bookingType = await _manager.GetBookingTypeByIdAsync(id);
+            if (bookingType == null) return NotFound();
+            return Ok(bookingType);
         }
 
-        // POST api/<BookingController>
-        [HttpPost]
-        public void Post([FromBody] string value)
+        // GET api/staff/bookingType/name/{name}
+        [HttpGet("bookingType/name/{name}")]
+        public async Task<ActionResult<BookingType>> GetBookingTypeByName(string name)
         {
+            var bookingType = await _manager.GetBookingTypeByNameAsync(name);
+            if (bookingType == null) return NotFound();
+            return Ok(bookingType);
         }
 
-        // PUT api/<BookingController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        [HttpGet("booking")]
+        public async Task<ActionResult<BookingType>> GetAllBookings()
         {
+            var booking = await _manager.GetAllBookingsAsync();
+            if (booking == null) return NotFound();
+            return Ok(booking);
         }
-
-        // DELETE api/<BookingController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        [HttpGet("booking/id/{id}")]
+        public async Task<ActionResult<BookingType>> GetBookingById(Guid id)
         {
+            var booking = await _manager.GetBookingByIdAsync(id);
+            if (booking == null) return NotFound();
+            return Ok(booking);
+        }
+        [HttpPost("booking")]
+        public async Task<ActionResult<string>> CreateBooking([FromBody] BookingDTO booking)
+        {
+            if (booking == null) return BadRequest();
+            await _manager.CreateBooking(booking);
+            return Ok(booking);
         }
     }
 }

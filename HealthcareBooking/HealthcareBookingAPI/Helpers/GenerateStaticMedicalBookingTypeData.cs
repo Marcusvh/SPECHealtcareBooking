@@ -1,6 +1,6 @@
 ﻿using HealthcareModels.Models.HealthcareStaff;
 
-namespace HealthcareBookingAPI.DataGeneration.Helpers
+namespace HealthcareBookingAPI.Helpers
 {
     public static class GenerateStaticMedicalBookingTypeData
     {

@@ -1,6 +1,6 @@
 ﻿using Bogus;
 using HealthcareBookingAPI.Context;
-using HealthcareBookingAPI.DataGeneration.Helpers;
+using HealthcareBookingAPI.Helpers;
 using HealthcareModels.Models;
 using HealthcareModels.Models.HealthcareStaff;
 using System.Linq;

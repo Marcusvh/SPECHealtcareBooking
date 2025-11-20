@@ -15,6 +15,22 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<HealthcareContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<IPatient, PatientManager>();
+builder.Services.AddScoped<IDoctorManager, DoctorManager>();
+builder.Services.AddScoped<IBookingManager, BookingManager>();
+
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy
+                .AllowAnyOrigin()
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
+
 
 var app = builder.Build();
 
@@ -24,6 +40,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors("AllowFrontend");
 
 app.UseHttpsRedirection();
 
