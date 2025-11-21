@@ -3,6 +3,7 @@ using HealthcareBookingAPI.DTO;
 using HealthcareBookingAPI.Helpers.DTOMappers;
 using HealthcareBookingAPI.Interfaces;
 using HealthcareModels.Models;
+using HealthcareModels.Models.HealthcareStaff;
 using Microsoft.EntityFrameworkCore;
 
 namespace HealthcareBookingAPI.Managers
@@ -19,15 +20,16 @@ namespace HealthcareBookingAPI.Managers
         {
             //------------------
             //-------------------
-            // split into staff and doctor
             try
             {
                 Booking newBooking = BookingMapper.MapBooking(booking);
 
                 // staffid
-                if (booking.StaffId.HasValue) {
+                if (!booking.StaffId.HasValue) {
                     BookingType bType = await _context.BookingTypes.FirstOrDefaultAsync(o => o.BookingTypeId == booking.BookingTypeId);
-                    await _context.Doctors.FirstOrDefaultAsync(o => o.SupportedBookingTypes.Contains(bType));
+                    Doctor d = await _context.Doctors.Include(o => o.SupportedBookingTypes).FirstOrDefaultAsync(o => o.SupportedBookingTypes.Contains(bType));
+                    newBooking.StaffId = d.StaffId;
+                    newBooking.Staff = d;
                 } 
                 else {
                     newBooking.StaffId = booking.StaffId.Value;
@@ -54,7 +56,8 @@ namespace HealthcareBookingAPI.Managers
 
         public async Task<List<BookingType>> GetAllBookingTypesAsync()
         {
-            return await _context.BookingTypes.ToListAsync();
+            var res = _context.BookingTypes.GroupBy(d => d.Name).Select(o => o.First());
+            return await res.ToListAsync();
         }
 
         public async Task<Booking> GetBookingByIdAsync(Guid id)

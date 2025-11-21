@@ -3,6 +3,7 @@ using HealthcareBookingAPI.Context;
 using HealthcareBookingAPI.Helpers;
 using HealthcareModels.Models;
 using HealthcareModels.Models.HealthcareStaff;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace HealthcareBookingAPI.DataGeneration
@@ -83,23 +84,21 @@ namespace HealthcareBookingAPI.DataGeneration
                 .RuleFor(d => d.MedicalLincenseNumber, f => $"LIC-{f.Random.Number(100000, 999999)}")
                 .RuleFor(d => d.YearsOfExperience, f => f.Random.Int(1, 35))
                 .RuleFor(d => d.IsAcceptingNewPatients, f => f.Random.Bool())
-                .RuleFor(d => d.SupportedBookingTypes, (f, d) =>
+                .RuleFor(d => d.SupportedBookingTypeIds, (f, d) =>
                 {
-                    // Step 1: Find the *valid definition types* from your in-memory list
                     var validNames = _medicalBookingTypes
-                        .Where(x =>
-                            x.RequiredStaffType == StaffType.Doctor &&
-                            x.AllowedSpecialties.Contains(d.Specialties))
+                        .Where(x => x.RequiredStaffType == StaffType.Doctor &&
+                                    x.AllowedSpecialties.Contains(d.Specialties))
                         .Select(x => x.Name)
                         .ToList();
 
-                    // Step 2: Pull the matching BookingTypes from the DB
-                    var dbBookingTypes = _context.BookingTypes
+                    return _context.BookingTypes
                         .Where(bt => validNames.Contains(bt.Name))
+                        .Select(bt => bt.BookingTypeId)
                         .ToList();
-
-                    return dbBookingTypes;
                 });
+
+
         }
 
         // -----------------------------
@@ -116,7 +115,7 @@ namespace HealthcareBookingAPI.DataGeneration
                 .RuleFor(n => n.AssignedDepartment, f => f.PickRandom(SpecialtyDepartmentMap.Values.ToList()))
                 .RuleFor(n => n.Certification, f => f.PickRandom(NurseCertifications, f.Random.Int(1, 4)).ToList())
                 .RuleFor(n => n.YearsOfExperience, f => f.Random.Int(0, 25))
-                .RuleFor(n => n.SupportedBookingTypes, f =>
+                .RuleFor(n => n.SupportedBookingTypeIds, f =>
                 {
                     // Step 1: Find the *valid definition types* from your in-memory list
                     var validNames = _medicalBookingTypes
@@ -126,13 +125,12 @@ namespace HealthcareBookingAPI.DataGeneration
                         .ToList();
 
                     // Step 2: Pull the matching BookingTypes from the DB
-                    var dbBookingTypes = _context.BookingTypes
+                    return _context.BookingTypes
                         .Where(bt => validNames.Contains(bt.Name))
+                        .Select(bt => bt.BookingTypeId)
                         .ToList();
 
-                    return dbBookingTypes;
-
-        });
+                });
         }
         // -----------------------------
         // MedicalStudent faker
@@ -150,20 +148,21 @@ namespace HealthcareBookingAPI.DataGeneration
                 .RuleFor(ms => ms.InternshipStartDate, f => DateOnly.FromDateTime(f.Date.Past(1)))
                 .RuleFor(ms => ms.InternshipEndDate,
                     (f, ms) => ms.InternshipStartDate.AddMonths(f.Random.Int(3, 12)))
-                .RuleFor(ms => ms.SupportedBookingTypes, f =>
+                .RuleFor(ms => ms.SupportedBookingTypeIds, f =>
                 {
-                    var valid = _medicalBookingTypes
+                    var validNames = _medicalBookingTypes
                         .Where(x =>
                             x.RequiredStaffType == StaffType.Nurse || // med students assist nurses
                             x.RequiredStaffType == StaffType.Doctor &&
-                            x.DurationMinutes <= 20);                  // can assist in short consults
+                            x.DurationMinutes <= 20)                  // can assist in short consults
+                        .Select(x => x.Name)
+                        .ToList();
 
-                    return valid.Select(x => new BookingType
-                    {
-                        BookingTypeId = Guid.NewGuid(),
-                        Name = x.Name,
-                        Description = x.Description
-                    }).ToList();
+                    // Step 2: Pull the matching BookingTypes from the DB
+                    return _context.BookingTypes
+                        .Where(bt => validNames.Contains(bt.Name))
+                        .Select(bt => bt.BookingTypeId)
+                        .ToList();
                 });
         }
 

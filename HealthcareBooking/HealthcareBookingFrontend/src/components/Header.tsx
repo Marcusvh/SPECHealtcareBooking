@@ -3,7 +3,7 @@ import NavBar from "./Nav";
 
 const Header: React.FC = () => {
     return (
-        <header className="shadow-md border-b border-gray-500 rounded-md bg-white">
+        <header className="shadow-md border-b border-gray-500 rounded-md bg-white w-full">
             <div className="max-w-[1280px] mx-auto px-6 h-20 flex items-center justify-between">
             <Link to={"/"} className="text-2xl font-black text-rose-600 hover:text-rose-700">HealthBook</Link>
                 <NavBar></NavBar>

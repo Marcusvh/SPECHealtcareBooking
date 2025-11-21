@@ -2,9 +2,12 @@ import React, { useEffect, useState } from "react";
 import { apiRequest } from "../apiRequest/HealthcareApi";
 import { type Doctor } from "../types/Doctor";
 import { type BookingType } from "../types/BookingType.ts";
+import BookingTimeBtn from "../components/BookingTimeBtn.tsx";
+import { type Booking } from "../types/Booking.ts";
 
 const Booking: React.FC = () => {
 
+  const [allDoctors, setAllDoctors] = useState<Doctor[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
   const [bookingTypes, setBookingTypes] = useState<BookingType[]>([]);
 
@@ -15,14 +18,16 @@ const Booking: React.FC = () => {
   const [doctorId, setDoctorId] = useState<string | null>(null);
   const [notes, setNotes] = useState("");
 
+  let bookingTimes = ["08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00", "16:00"];
   useEffect(() => {
     const load = async () => {
       try {
         const doctorsData = await apiRequest("Staff/doctor", "GET");
         const bookingTypeData = await apiRequest("Booking/bookingType", "GET");
-        console.log(bookingTypeData);
+        console.log(doctorsData);
         
         setDoctors(doctorsData);
+        setAllDoctors(doctorsData);
         setBookingTypes(bookingTypeData);
       } catch (err) {
         console.error(err);
@@ -31,19 +36,41 @@ const Booking: React.FC = () => {
     load();
   }, []);
 
+  useEffect(() => {
+    if (!bookingType) {
+      setDoctors(allDoctors);
+      return;
+    }
+
+    const filtered = allDoctors.filter(d =>
+      d.supportedBookingTypeIds.includes(bookingType)
+    );
+    setDoctors(filtered);
+  }, [bookingType, allDoctors]);
+
+  useEffect(() => {
+    if (doctorId && !doctors.some(d => d.staffId === doctorId)) {
+      setDoctorId(null);
+    }
+  }, [doctors]);
+
+
   const submitBooking = async () => {
-    const body = {
-      date,
-      time,
-      bookingType,
-      doctorId,
-      notes
+    const [year, month, day] = date.split("-").map(Number);
+    const [hour, minute] = time.split(":").map(Number);
+
+    const body: Booking = {
+      startTime: new Date(year, month - 1, day, hour, minute),
+      bookingTypeId: bookingType,
+      patientId: "03c8bfdb-cac1-4a44-ad25-58bfab45461f", // Replace with actual user ID from auth context
+      staffId: doctorId ?? undefined,
+      patientNotes: notes || undefined
     };
 
     console.log("Submitting booking:", body);
 
     try {
-      const result = await apiRequest("booking", "POST", body);
+      const result = await apiRequest("Booking/booking", "POST", body);
       console.log(result);
       alert("Booking created!");
     } catch (err) {
@@ -54,13 +81,20 @@ const Booking: React.FC = () => {
 
   return (
     <div className="w-full bg-gray-50 min-h-screen py-20">
+<style>
+  {`
+    .bookingTimebtnActive {
+        background-color: #be123c;
+    }
+  `}
+</style>
       <div className="max-w-xl mx-auto bg-white shadow-lg rounded-xl p-10">
 
         <h1 className="text-3xl font-bold mb-6 text-center">
           Book an Appointment
         </h1>
 
-        <fieldset className="flex">
+        <fieldset className="">
             <div>
                 <label className="block mb-4">
                 <span className="text-gray-700 font-medium">Date</span>
@@ -72,16 +106,15 @@ const Booking: React.FC = () => {
                 />
                 </label>
             </div>
-            <div className="ml-[2rem]">
-                <label className="flex flex-col mb-4">
-                <span className="text-gray-700 font-medium">Time</span>
-                <input
-                    type="time"
-                    value={time}
-                    onChange={(e) => setTime(e.target.value)}
-                    className="w-fit border rounded-lg px-4 py-2 mt-1"
-                />
+            <div className="mb-4">
+                <label className="mb-4">
+                  <span className="text-gray-700 font-medium">Time</span>
                 </label>
+                  <div className="flex flex-wrap gap-4">
+                    {bookingTimes.map((t, index) => (
+                      <BookingTimeBtn key={index} title={t} onClick={() => setTime(t)} />
+                    ))}
+                  </div>
             </div>
             
         </fieldset>
@@ -97,7 +130,7 @@ const Booking: React.FC = () => {
           >
             <option value="">Select type...</option>
             {bookingTypes.map((b) => (
-              <option key={b.bookingTypeId} value={b.name}>
+              <option key={b.bookingTypeId} value={b.bookingTypeId}>
                 {b.name}
               </option>
             ))}
@@ -135,7 +168,7 @@ const Booking: React.FC = () => {
 
         <button
           onClick={submitBooking}
-          className="w-full bg-rose-600 text-white py-3 rounded-lg hover:bg-rose-700 transition text-lg"
+          className="w-full bg-rose-700 text-white py-3 rounded-lg hover:bg-rose-600 transition text-lg"
         >
           Confirm Booking
         </button>

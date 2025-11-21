@@ -69,7 +69,7 @@ const Home: React.FC = () => {
         </section>
 
         {/* FEATURED DOCTORS */}
-        <section className="py-16">
+        <section className="py-16 max-h-[60vh]">
           <h2 className="text-3xl font-bold mb-8">Featured Doctors</h2>
 
           <div className="grid grid-cols-3 gap-8">
@@ -81,7 +81,7 @@ const Home: React.FC = () => {
                 <img
                   src={`${i.docPic}`}
                   alt="doctor"
-                  className="w-fit mx-auto h-[50vh] h-56 object-cover rounded-lg mb-4"
+                  className="w-fit mx-auto h-72 object-cover rounded-lg mb-4"
                 />
 
                 <h3 className="text-xl font-semibold">{i.name}</h3>

@@ -2,6 +2,8 @@
 using HealthcareBookingAPI.DTO;
 using HealthcareModels.Models;
 using HealthcareModels.Models.HealthcareStaff;
+using Microsoft.EntityFrameworkCore;
+using System.Numerics;
 
 namespace HealthcareBookingAPI.DataGeneration
 {
@@ -34,15 +36,41 @@ namespace HealthcareBookingAPI.DataGeneration
             await _context.Doctors.AddRangeAsync(doctors);
             await _context.SaveChangesAsync();
 
+            // Now attach BookingTypes to the join table
+            foreach (var doct in doctors)
+            {
+                doct.SupportedBookingTypes = await _context.BookingTypes
+               .Where(bt => doct.SupportedBookingTypeIds.Contains(bt.BookingTypeId)).ToListAsync();
+            }
+            
+            await _context.SaveChangesAsync();
+
+
             List<Nurse> nurses = _staffDataGeneration.GenerateNurse().Generate(dto.NumNurse);
+            await _context.Nurses.AddRangeAsync(nurses);
+            await _context.SaveChangesAsync();
+
+            // Now attach BookingTypes to the join table
+            foreach (var nurs in nurses)
+            {
+                nurs.SupportedBookingTypes = await _context.BookingTypes
+               .Where(bt => nurs.SupportedBookingTypeIds.Contains(bt.BookingTypeId)).ToListAsync();
+            }
 
             List<Guid> doctorIds = _context.Doctors.Select(o => o.StaffId).ToList();
             List<MedicalStudent> medStudent = _staffDataGeneration.GenerateMedStudent(doctorIds).Generate(dto.NumMedStudent);
+            await _context.MedicalStudents.AddRangeAsync(medStudent);
+            await _context.SaveChangesAsync();
+
+            // Now attach BookingTypes to the join table
+            foreach (var medStu in medStudent)
+            {
+                medStu.SupportedBookingTypes = await _context.BookingTypes
+               .Where(bt => medStu.SupportedBookingTypeIds.Contains(bt.BookingTypeId)).ToListAsync();
+            }
 
             await _context.Patients.AddRangeAsync(patients);
             await _context.Staffs.AddRangeAsync(staffs);
-            await _context.Nurses.AddRangeAsync(nurses);
-            await _context.MedicalStudents.AddRangeAsync(medStudent);
             await _context.SaveChangesAsync();
         }
         public async Task GenerateBookings(DataGenerationBookingsDTO dto) 

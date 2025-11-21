@@ -8,5 +8,6 @@ export interface Doctor {
   name: string;
   description: string;
   type: "Doctor"; // for validation
+  supportedBookingTypeIds: string[];
   supportedBookingTypes: string[];
 }
