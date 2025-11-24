@@ -25,3 +25,5 @@ DB: PostgreSQL
 DB manager: Beekeeper studio
 DB structure decisions: TPT (Table per Type), one base table that subtables inherent from
 Data generation: Faker (bogus)
+DB decicions
+- structure and columns of tables
