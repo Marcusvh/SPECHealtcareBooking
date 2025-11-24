@@ -14,16 +14,16 @@ namespace HealthcareBookingAPI.Managers
         }
         public async Task<List<Doctor>> GetAllDoctorsAsync(int? numDoctors = null)
         {
-            IQueryable<Doctor> query = _context.Doctors;
+            IQueryable<Doctor> query = _context.Doctors
+                .AsNoTracking();
 
             if (numDoctors.HasValue && numDoctors.Value > 0)
             {
                 query = query.Take(numDoctors.Value);
             }
-            query.Include(o => o.SupportedBookingTypes);
+
             return await query.ToListAsync();
         }
-
 
         public async Task<Doctor> GetDoctorByIdAsync(Guid id)
         {

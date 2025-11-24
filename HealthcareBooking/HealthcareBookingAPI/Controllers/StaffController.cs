@@ -41,16 +41,6 @@ namespace HealthcareBookingAPI.Controllers
         }
 
 
-        // PUT api/<StaffController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<StaffController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
+       
     }
 }

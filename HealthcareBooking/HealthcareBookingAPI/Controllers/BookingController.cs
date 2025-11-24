@@ -19,9 +19,16 @@ namespace HealthcareBookingAPI.Controllers
         }
         // GET: api/<BookingController>
         [HttpGet("bookingType")]
+        [ProducesResponseType(typeof(List<BookingType>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+
         public async Task<ActionResult<List<BookingType>>> GetAllBookingTypes()
         {
-            return Ok(await _manager.GetAllBookingTypesAsync());
+            List<BookingType> bookingTypes = await _manager.GetAllBookingTypesAsync();
+
+            if(bookingTypes == null || bookingTypes.Count == 0) return NotFound();
+
+            return Ok(bookingTypes);
         }
 
         // GET api/staff/bookingType/id/{id}
@@ -37,12 +44,14 @@ namespace HealthcareBookingAPI.Controllers
         [HttpGet("bookingType/name/{name}")]
         public async Task<ActionResult<BookingType>> GetBookingTypeByName(string name)
         {
-            var bookingType = await _manager.GetBookingTypeByNameAsync(name);
-            if (bookingType == null) return NotFound();
-            return Ok(bookingType);
+            ResultResponse<BookingType> result = await _manager.GetBookingTypeByNameAsync(name);
+            if (!result.IsSuccess || result.Value == null) return NotFound();
+            return Ok(result.Value);
         }
 
         [HttpGet("booking")]
+        [ProducesResponseType(typeof(List<Booking>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BookingType>> GetAllBookings()
         {
             var booking = await _manager.GetAllBookingsAsync();
@@ -50,6 +59,8 @@ namespace HealthcareBookingAPI.Controllers
             return Ok(booking);
         }
         [HttpGet("booking/id/{id}")]
+        [ProducesResponseType(typeof(BookingType), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<BookingType>> GetBookingById(Guid id)
         {
             var booking = await _manager.GetBookingByIdAsync(id);
@@ -57,11 +68,19 @@ namespace HealthcareBookingAPI.Controllers
             return Ok(booking);
         }
         [HttpPost("booking")]
+        [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<string>> CreateBooking([FromBody] BookingDTO booking)
         {
             if (booking == null) return BadRequest();
-            await _manager.CreateBooking(booking);
-            return Ok(booking);
+
+            ResultResponse<Guid> result = await _manager.CreateBookingAsync(booking);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+
+            return CreatedAtAction(nameof(GetBookingById), new { id = result.Value }, result.Value);
         }
     }
 }
