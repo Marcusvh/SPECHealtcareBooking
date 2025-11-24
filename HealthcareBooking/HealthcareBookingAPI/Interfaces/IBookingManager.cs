@@ -10,6 +10,6 @@ namespace HealthcareBookingAPI.Interfaces
         Task<ResultResponse<BookingType>> GetBookingTypeByNameAsync(string name);
         Task<List<Booking>> GetAllBookingsAsync();
         Task<Booking?> GetBookingByIdAsync(Guid id);
-        Task<ResultResponse<Guid>> CreateBookingAsync(BookingDTO booking);
+        Task<ResultResponse<Booking>> CreateBookingAsync(BookingDTO booking);
     }
 }

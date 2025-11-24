@@ -62,7 +62,7 @@ const Booking: React.FC = () => {
     const body: Booking = {
       startTime: new Date(year, month - 1, day, hour, minute),
       bookingTypeId: bookingType,
-      patientId: "03c8bfdb-cac1-4a44-ad25-58bfab45461f", // Replace with actual user ID from auth context
+      patientId: "01ad4f94-f1d5-4290-9a0f-405ad3616adc", // Replace with actual user ID from auth context
       staffId: doctorId ?? undefined,
       patientNotes: notes || undefined
     };

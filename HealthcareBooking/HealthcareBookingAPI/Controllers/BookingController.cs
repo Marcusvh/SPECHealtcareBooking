@@ -13,9 +13,11 @@ namespace HealthcareBookingAPI.Controllers
     public class BookingController : ControllerBase
     {
         private readonly IBookingManager _manager;
-        public BookingController(IBookingManager manager)
+        private readonly INotifyManager _notify;
+        public BookingController(IBookingManager manager, INotifyManager notify)
         {
             _manager = manager;
+            _notify = notify;
         }
         // GET: api/<BookingController>
         [HttpGet("bookingType")]
@@ -68,19 +70,30 @@ namespace HealthcareBookingAPI.Controllers
             return Ok(booking);
         }
         [HttpPost("booking")]
-        [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(Booking), StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<string>> CreateBooking([FromBody] BookingDTO booking)
+        public async Task<ActionResult<Booking>> CreateBooking([FromBody] BookingDTO booking)
         {
             if (booking == null) return BadRequest();
 
-            ResultResponse<Guid> result = await _manager.CreateBookingAsync(booking);
+            ResultResponse<Booking> result = await _manager.CreateBookingAsync(booking);
             if (!result.IsSuccess)
             {
                 return BadRequest(result.Error);
             }
 
-            return CreatedAtAction(nameof(GetBookingById), new { id = result.Value }, result.Value);
+            NotifyStaff notify = new NotifyStaff()
+            {
+                StaffId = result.Value.StaffId,
+                RelatedBookingId = result.Value.BookingId,
+                Message = "A new booking has been created.",
+                NotificationType = NotificationType.BookingCreated,
+                NotificationStatus = NotificationStatus.Sent,
+                CreatedAt = DateTime.UtcNow
+            };
+            await _notify.CreateNotificationForStaffAsync(notify);
+
+            return CreatedAtAction(nameof(GetBookingById), new { id = result.Value.BookingId });
         }
     }
 }

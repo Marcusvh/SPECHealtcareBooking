@@ -236,6 +236,8 @@ namespace HealthcareBookingAPI.Controllers
         /// if the input parameters are null, or <see cref="OkObjectResult"/> with a summary of the generated data upon
         /// success.</returns>
         [HttpPost("allData")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult> GenerateAllData([FromBody] DataGenerationAllDTO dto)
         {
             if (dto == null)

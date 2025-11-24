@@ -17,6 +17,7 @@ builder.Services.AddDbContext<HealthcareContext>(options => options.UseNpgsql(bu
 builder.Services.AddScoped<IPatient, PatientManager>();
 builder.Services.AddScoped<IDoctorManager, DoctorManager>();
 builder.Services.AddScoped<IBookingManager, BookingManager>();
+builder.Services.AddScoped<INotifyManager, NotifyManager>();
 
 
 builder.Services.AddCors(options =>

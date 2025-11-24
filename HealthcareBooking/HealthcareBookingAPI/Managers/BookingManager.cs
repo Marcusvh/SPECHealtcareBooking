@@ -18,17 +18,17 @@ namespace HealthcareBookingAPI.Managers
 
         #region Booking Creation
 
-        public async Task<ResultResponse<Guid>> CreateBookingAsync(BookingDTO booking)
+        public async Task<ResultResponse<Booking>> CreateBookingAsync(BookingDTO booking)
         {
             if (booking == null)
-                return ResultResponse<Guid>.Fail("Booking data must be provided.");
+                return ResultResponse<Booking>.Fail("Booking data must be provided.");
 
             // Validate BookingType
             var bType = await _context.BookingTypes
                 .FindAsync(booking.BookingTypeId);
 
             if (bType == null)
-                return ResultResponse<Guid>.Fail("Invalid Booking Type specified.");
+                return ResultResponse<Booking>.Fail("Invalid Booking Type specified.");
 
             // Map DTO to entity
             var newBooking = BookingMapper.MapBooking(booking);
@@ -46,7 +46,7 @@ namespace HealthcareBookingAPI.Managers
                     .FirstOrDefaultAsync();
 
                 if (doctor == null)
-                    return ResultResponse<Guid>.Fail("No available doctor supports this booking type.");
+                    return ResultResponse<Booking>.Fail("No available doctor supports this booking type.");
 
                 newBooking.StaffId = doctor.StaffId;
                 newBooking.Staff = doctor;
@@ -59,7 +59,7 @@ namespace HealthcareBookingAPI.Managers
                     .FirstOrDefaultAsync(d => d.StaffId == booking.StaffId.Value);
 
                 if (doctor == null)
-                    return ResultResponse<Guid>.Fail("Specified staff member does not exist.");
+                    return ResultResponse<Booking>.Fail("Specified staff member does not exist.");
 
                 newBooking.StaffId = doctor.StaffId;
                 newBooking.Staff = doctor;
@@ -74,7 +74,7 @@ namespace HealthcareBookingAPI.Managers
             await _context.Bookings.AddAsync(newBooking);
             await _context.SaveChangesAsync();
 
-            return ResultResponse<Guid>.Success(newBooking.BookingId);
+            return ResultResponse<Booking>.Success(newBooking);
         }
 
         #endregion

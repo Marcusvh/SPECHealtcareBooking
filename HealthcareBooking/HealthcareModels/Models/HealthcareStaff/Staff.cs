@@ -23,6 +23,6 @@ namespace HealthcareModels.Models.HealthcareStaff
         public StaffType Type { get; set; } // doctor, nurse, medicine students
         public List<Guid> SupportedBookingTypeIds { get; set; }
         public List<BookingType> SupportedBookingTypes { get; set; } = new();
-
+        public List<NotifyStaff> NotifyStaffs { get; set; } = new();
     }
 }
