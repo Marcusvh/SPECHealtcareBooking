@@ -7,6 +7,7 @@ const NavBar: React.FC = () => {
         <Link to={"/Booking"} className="hover:text-rose-600 transition">Book appointment</Link>
         <Link to={"/"} className="hover:text-rose-600 transition">Clinics</Link>
         <Link to={"/"} className="hover:text-rose-600 transition">Contact</Link>
+        <Link to={"/staff-booking-confirmation"} className="hover:text-rose-600 transition">Staff Booking Confirmation</Link>
     </nav>
   );
 };

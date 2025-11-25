@@ -4,4 +4,5 @@ export interface Booking {
     bookingTypeId: string,
     patientId: string,
     staffId?: string
+    
 }

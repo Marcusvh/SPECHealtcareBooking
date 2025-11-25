@@ -3,6 +3,7 @@ using HealthcareBookingAPI.DTO;
 using HealthcareBookingAPI.Interfaces;
 using HealthcareModels.Models;
 using HealthcareModels.Models.HealthcareStaff;
+using Microsoft.EntityFrameworkCore;
 
 namespace HealthcareBookingAPI.Managers
 {
@@ -31,6 +32,21 @@ namespace HealthcareBookingAPI.Managers
             _context.NotifyStaffs.Add(notifyStaff);
             await _context.SaveChangesAsync();
             return ResultResponse<NotifyStaff>.Success(notifyStaff);
+        }
+
+        public async Task<List<NotifyStaff>> GetAllNotificationsAsync()
+        {
+            return await _context.NotifyStaffs
+                .AsNoTracking()
+                .ToListAsync();
+        }
+
+        public async Task<List<NotifyStaff>> GetAllNotificationsByStaffIdAsync(Guid staffId)
+        {
+            return await _context.NotifyStaffs
+                .AsNoTracking()
+                .Where(n => n.StaffId == staffId)
+                .ToListAsync();
         }
     }
 }

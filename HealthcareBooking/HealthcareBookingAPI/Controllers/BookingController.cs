@@ -28,7 +28,7 @@ namespace HealthcareBookingAPI.Controllers
         {
             List<BookingType> bookingTypes = await _manager.GetAllBookingTypesAsync();
 
-            if(bookingTypes == null || bookingTypes.Count == 0) return NotFound();
+            if (bookingTypes == null || bookingTypes.Count == 0) return NotFound();
 
             return Ok(bookingTypes);
         }
@@ -93,7 +93,60 @@ namespace HealthcareBookingAPI.Controllers
             };
             await _notify.CreateNotificationForStaffAsync(notify);
 
-            return CreatedAtAction(nameof(GetBookingById), new { id = result.Value.BookingId });
+            return CreatedAtAction(nameof(GetBookingById), new { id = result.Value.BookingId }, null);
+        }
+        [HttpGet("booking/bookingStage/{stage}")]
+        [ProducesResponseType(typeof(List<Booking>), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<List<Booking>>> GetBookingsByStage(BookingCheckStage stage)
+        {
+            var bookings = await _manager.GetBookingsByStageAsync(stage);
+            if (bookings == null) return NotFound();
+            if (bookings.Count == 0) return new List<Booking>();
+            return Ok(bookings);
+        }
+        [HttpGet("booking/detailedViews")]
+        [ProducesResponseType(typeof(List<DetailedBookingViewDTO>), StatusCodes.Status200OK)]
+        public async Task<ActionResult<List<DetailedBookingViewDTO>>> GetDetailedBookingViews()
+        {
+            var detailedViews = await _manager.GetDetailedBookingViewsAsync();
+            return Ok(detailedViews);
+        }
+        [HttpPatch("booking/id/{bookingId}/staffNote")]
+        [ProducesResponseType(typeof(Guid), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Guid>> UpdateStaffNoteOnBooking(Guid bookingId, [FromBody] string staffNote)
+        {
+            var result = await _manager.UpdateStaffNoteOnBooking(bookingId, staffNote);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+            return NoContent();
+        }
+        [HttpPatch("booking/id/{bookingId}/confirm/staffId/{staffId}")]
+        [ProducesResponseType(typeof(Guid), StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Guid>> ConfirmBookingByStaff(Guid bookingId, Guid staffId)
+        {
+            var result = await _manager.ConfirmBookingByStaffAsync(bookingId, staffId);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+            return NoContent();
+        }
+        [HttpPatch("booking/id/{bookingId}/reject/staffId/{staffId}")]
+        [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Guid>> RejectBookingByStaff(Guid bookingId, Guid staffId, [FromBody] string? reason)
+        {
+            var result = await _manager.RejectBookingByStaffAsync(bookingId, staffId, reason);
+            if (!result.IsSuccess)
+            {
+                return BadRequest(result.Error);
+            }
+            return Ok(result.Value);
         }
     }
 }

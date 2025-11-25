@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { apiRequest } from "../apiRequest/HealthcareApi";
-import { type Doctor } from "../types/Doctor";
+import { apiRequest } from "../apiRequest/HealthcareApi.ts";
+import { type Doctor } from "../types/Doctor.ts";
 import { type BookingType } from "../types/BookingType.ts";
 import BookingTimeBtn from "../components/BookingTimeBtn.tsx";
 import { type Booking } from "../types/Booking.ts";
 
-const Booking: React.FC = () => {
+const BookingAppointment: React.FC = () => {
 
   const [allDoctors, setAllDoctors] = useState<Doctor[]>([]);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -62,7 +62,7 @@ const Booking: React.FC = () => {
     const body: Booking = {
       startTime: new Date(year, month - 1, day, hour, minute),
       bookingTypeId: bookingType,
-      patientId: "01ad4f94-f1d5-4290-9a0f-405ad3616adc", // Replace with actual user ID from auth context
+      patientId: "028ef28d-86f8-40c3-a042-7efad18422f0", // Replace with actual user ID from auth context
       staffId: doctorId ?? undefined,
       patientNotes: notes || undefined
     };
@@ -177,4 +177,4 @@ const Booking: React.FC = () => {
   );
 };
 
-export default Booking;
+export default BookingAppointment;

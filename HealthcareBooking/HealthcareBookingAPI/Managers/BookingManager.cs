@@ -120,6 +120,100 @@ namespace HealthcareBookingAPI.Managers
 
             return ResultResponse<BookingType>.Success(resultBookngType);
         }
-
+        public async Task<List<Booking>> GetBookingsByStageAsync(BookingCheckStage stage)
+        {
+            return await _context.Bookings
+                .AsNoTracking()
+                .Where(b => b.BookingCheckStage == stage)
+                .ToListAsync();
+        }
+        public async Task<List<DetailedBookingViewDTO>> GetDetailedBookingViewsAsync()
+        {
+            var bookings = await _context.Bookings
+                .AsNoTracking()
+                .Where(b => b.BookingCheckStage == BookingCheckStage.Second)
+                .Select(ns => new DetailedBookingViewDTO()
+                {
+                    BookingStatus = ns.Status,
+                    BookingTypeName = ns.BookingType.Name,
+                    StartTime = ns.StartTime,
+                    PatientFullName = ns.Patient.FullName,
+                    DOB = ns.Patient.DateOfBirth,
+                    Duration = new TimeOnly(0, 30),
+                    PatientNotes = ns.PatientNotes,
+                    StaffNotes = ns.StaffNotes,
+                    DetailedBookingViewid = ns.BookingId,
+                    PatientEmail = ns.Patient.Email,
+                    PatientPhoneNumber = ns.Patient.Phone
+                })
+                .ToListAsync();
+            return bookings;
+        }
+        public async Task<ResultResponse<Guid>> UpdateStaffNoteOnBooking(Guid bookingId, string staffNote)
+        {
+            var booking = await _context.Bookings
+                .FirstOrDefaultAsync(b => b.BookingId == bookingId);
+            if (booking == null)
+            {
+                return ResultResponse<Guid>.Fail($"Booking with ID {bookingId} not found.");
+            }
+            booking.StaffNotes = staffNote;
+            booking.UpdatedAt = DateTime.UtcNow;
+            try
+            {
+                await _context.SaveChangesAsync();
+                return ResultResponse<Guid>.Success(booking.BookingId);
+            }
+            catch (Exception ex)
+            {
+                return ResultResponse<Guid>.Fail($"Error updating booking: {ex.Message}");
+            }
+        }
+        public async Task<ResultResponse<Guid>> ConfirmBookingByStaffAsync(Guid bookingId, Guid staffId)
+        {
+            var booking = await _context.Bookings
+                .FirstOrDefaultAsync(b => b.BookingId == bookingId && b.StaffId == staffId);
+            if (booking == null)
+            {
+                return ResultResponse<Guid>.Fail($"Booking with ID {bookingId} not found for staff ID {staffId}.");
+            }
+            booking.BookingCheckStage = BookingCheckStage.Confirmed;
+            booking.StaffConfirmedAt = DateTime.UtcNow;
+            booking.ConfirmedByStaffId = staffId;
+            booking.UpdatedAt = DateTime.UtcNow;
+            try
+            {
+                await _context.SaveChangesAsync();
+                return ResultResponse<Guid>.Success(booking.BookingId);
+            }
+            catch (Exception ex)
+            {
+                return ResultResponse<Guid>.Fail($"Error confirming booking: {ex.Message}");
+            }
+        }
+        public async Task<ResultResponse<Guid>> RejectBookingByStaffAsync(Guid bookingId, Guid staffId, string? reason)
+        {
+            var booking = await _context.Bookings
+                .FirstOrDefaultAsync(b => b.BookingId == bookingId && b.StaffId == staffId);
+            if (booking == null)
+            {
+                return ResultResponse<Guid>.Fail($"Booking with ID {bookingId} not found for staff ID {staffId}.");
+            }
+            booking.BookingCheckStage = BookingCheckStage.Cancelled;
+            booking.Status = BookingStatus.Cancelled;
+            booking.StaffConfirmedAt = DateTime.UtcNow; // should probably be StaffRejectedAt but keeping consistent with existing field
+            booking.ConfirmedByStaffId = staffId; // should probably be RejectedByStaffId but keeping consistent with existing field
+            booking.StaffNotes = booking.StaffNotes + "\n\nReason for rejection:\n" + reason;
+            booking.UpdatedAt = DateTime.UtcNow;
+            try
+            {
+                await _context.SaveChangesAsync();
+                return ResultResponse<Guid>.Success(booking.BookingId);
+            }
+            catch (Exception ex)
+            {
+                return ResultResponse<Guid>.Fail($"Error rejecting booking: {ex.Message}");
+            }
+        }
     }
 }
