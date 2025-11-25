@@ -27,3 +27,5 @@ DB structure decisions: TPT (Table per Type), one base table that subtables inhe
 Data generation: Faker (bogus)
 DB decicions
 - structure and columns of tables
+EF config files
+flows
