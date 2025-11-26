@@ -30,7 +30,16 @@ namespace HealthcareBookingAPI.Controllers
         {
             return Ok(await _manager.GetAllNotificationsByStaffIdAsync(id));
         }
+        [HttpPatch("staff/id/{id}/read")]
+        [ProducesResponseType(typeof(NotifyStaff), 200)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<NotifyStaff>> UpdateNotificationStatus(Guid id)
+        {
+            var result = await _manager.UpdateNotificationStatusAsync(id);
+            if (!result.IsSuccess)
+                return BadRequest(result.Error);
+            return Ok(result.Value);
+        }
 
-        
     }
 }

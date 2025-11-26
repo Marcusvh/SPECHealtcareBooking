@@ -8,5 +8,6 @@ namespace HealthcareBookingAPI.Interfaces
         Task<ResultResponse<NotifyStaff>> CreateNotificationForStaffAsync(NotifyStaff notifyStaff);
         Task<List<NotifyStaff>> GetAllNotificationsByStaffIdAsync(Guid staffId);
         Task<List<NotifyStaff>> GetAllNotificationsAsync();
+        Task<ResultResponse<NotifyStaff>> UpdateNotificationStatusAsync(Guid notifyStaffId);
     }
 }

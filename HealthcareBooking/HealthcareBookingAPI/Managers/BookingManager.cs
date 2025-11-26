@@ -131,10 +131,10 @@ namespace HealthcareBookingAPI.Managers
         {
             var bookings = await _context.Bookings
                 .AsNoTracking()
-                .Where(b => b.BookingCheckStage == BookingCheckStage.Second)
                 .Select(ns => new DetailedBookingViewDTO()
                 {
                     BookingStatus = ns.Status,
+                    BookingStage = ns.BookingCheckStage,
                     BookingTypeName = ns.BookingType.Name,
                     StartTime = ns.StartTime,
                     PatientFullName = ns.Patient.FullName,
@@ -146,6 +146,7 @@ namespace HealthcareBookingAPI.Managers
                     PatientEmail = ns.Patient.Email,
                     PatientPhoneNumber = ns.Patient.Phone
                 })
+                .OrderBy(o => o.StartTime)
                 .ToListAsync();
             return bookings;
         }

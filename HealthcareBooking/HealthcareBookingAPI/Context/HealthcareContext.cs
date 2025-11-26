@@ -25,11 +25,13 @@ namespace HealthcareBookingAPI.Context
 
         // NOTIFY
         public DbSet<NotifyStaff> NotifyStaffs { get; set; }
+        public DbSet<NotifyPatient> NotifyPatients { get; set; }
 
         protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
         {
             configurationBuilder.Properties<DateTime>()
                 .HavePrecision(0);
+
             base.ConfigureConventions(configurationBuilder);
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -50,6 +52,8 @@ namespace HealthcareBookingAPI.Context
 
             // NOTIFY
             modelBuilder.ApplyConfiguration(new NotifyStaffConfiguration());
+            modelBuilder.ApplyConfiguration(new NotifyPatientConfiguration());
+
             base.OnModelCreating(modelBuilder);
         }
     }

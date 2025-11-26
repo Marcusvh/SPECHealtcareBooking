@@ -3,6 +3,7 @@ export interface BookingView {
     patientFullName: string;
     dob: string;
     bookingStatus: string;
+    bookingStage: string;
     patientNotes?: string;
     staffNotes?: string;
     startTime: string;

@@ -38,6 +38,7 @@ namespace HealthcareBookingAPI.Managers
         {
             return await _context.NotifyStaffs
                 .AsNoTracking()
+                .OrderBy(o => o.CreatedAt)
                 .ToListAsync();
         }
 
@@ -45,8 +46,21 @@ namespace HealthcareBookingAPI.Managers
         {
             return await _context.NotifyStaffs
                 .AsNoTracking()
+                .OrderBy(o => o.CreatedAt)
                 .Where(n => n.StaffId == staffId)
                 .ToListAsync();
+        }
+        public async Task<ResultResponse<NotifyStaff>> UpdateNotificationStatusAsync(Guid notifyStaffId)
+        {
+            NotifyStaff? notifyStaff = await _context.NotifyStaffs.FindAsync(notifyStaffId);
+
+            if (notifyStaff == null)
+                return ResultResponse<NotifyStaff>.Fail($"Could not find the notification with given ID: {notifyStaffId}");
+
+            notifyStaff.NotificationStatus = NotificationStatus.Read;
+            _context.NotifyStaffs.Update(notifyStaff);
+            await _context.SaveChangesAsync();
+            return ResultResponse<NotifyStaff>.Success(notifyStaff);
         }
     }
 }

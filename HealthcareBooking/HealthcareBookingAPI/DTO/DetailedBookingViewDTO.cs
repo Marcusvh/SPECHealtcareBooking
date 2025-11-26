@@ -13,6 +13,7 @@ namespace HealthcareBookingAPI.DTO
         public string PatientEmail { get; set; }
 
         public BookingStatus BookingStatus { get; set; }
+        public BookingCheckStage BookingStage { get; set; }
         public string? StaffNotes { get; set; }
         public DateTime StartTime { get; set; }
         public string BookingTypeName { get; set; }

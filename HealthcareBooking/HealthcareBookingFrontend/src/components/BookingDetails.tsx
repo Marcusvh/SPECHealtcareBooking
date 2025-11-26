@@ -6,11 +6,12 @@ import { apiRequest } from "../apiRequest/HealthcareApi";
 
 interface Props {
   booking: BookingView | any;
+  needsAction?: boolean;
   onConfirm?: () => void;
   onReject?: () => void;
 }
 
-const BookingDetails: React.FC<Props> = ({ booking, onConfirm, onReject }) => {
+const BookingDetails: React.FC<Props> = ({ booking, needsAction = true, onConfirm, onReject }) => {
   const [showContactModal, setShowContactModal] = useState(false);
     const handleSaveStaffNotes = (newText: string) => {
       console.log("save staffnote: " + newText);
@@ -44,10 +45,20 @@ const BookingDetails: React.FC<Props> = ({ booking, onConfirm, onReject }) => {
           <span className="font-medium">Status: </span>
           <span className={`px-2 py-1 rounded text-sm 
             ${booking?.bookingStatus === "Scheduled" ? "bg-yellow-100 text-yellow-700" : ""}
-            ${booking?.bookingStatus === "Confirmed" ? "bg-green-100 text-green-700" : ""}
-            ${booking?.bookingStatus === "Rejected" ? "bg-red-100 text-red-700" : ""}
+            ${booking?.bookingStatus === "Completed" ? "bg-green-100 text-green-700" : ""}
+            ${booking?.bookingStatus === "Cancelled" ? "bg-red-100 text-red-700" : ""}
           `}>
             {booking?.bookingStatus}
+          </span>
+        </p>
+        <p>
+          <span className="font-medium">Booking Confirmation Status: </span>
+          <span className={`px-2 py-1 rounded text-sm 
+            ${booking?.bookingStage === "Second" ? "bg-yellow-100 text-yellow-700" : ""}
+            ${booking?.bookingStage === "Confirmed" ? "bg-green-100 text-green-700" : ""}
+            ${booking?.bookingStage === "Cancelled" ? "bg-red-100 text-red-700" : ""}
+          `}>
+            {booking?.bookingStage === "Second" ? "Pending Confirmation" : booking?.bookingStage}
           </span>
         </p>
 
@@ -91,6 +102,7 @@ const BookingDetails: React.FC<Props> = ({ booking, onConfirm, onReject }) => {
       </div>
       
       {/* Actions */}
+      {needsAction ? (
       <div className="flex gap-3 mt-6 justify-center">
         <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
           onClick={onConfirm}>
@@ -112,6 +124,7 @@ const BookingDetails: React.FC<Props> = ({ booking, onConfirm, onReject }) => {
         )}
 
       </div>
+      ) : null}
     </div>
   );
 };
