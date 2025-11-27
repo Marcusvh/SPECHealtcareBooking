@@ -29,3 +29,27 @@ DB decicions
 - structure and columns of tables
 EF config files
 flows
+
+
+# Tech Stack Overview
+
+## Frontend
+| Area | Technology |
+|------|------------|
+| Framework | React (TypeScript) |
+| Language | TypeScript |
+
+## Backend
+| Area | Technology |
+|------|------------|
+| Runtime | .NET 8 (ASP.NET Core Web API) |
+| Language | C# |
+| ORM | Entity Framework Core |
+| Database | PostgreSQL |
+
+## Shared / Other
+| Area | Technology |
+|------|------------|
+| Model Layer | C# Models |
+| Data Generation | Bogus (faker) |
+| API UI/documentation | Swagger | 
