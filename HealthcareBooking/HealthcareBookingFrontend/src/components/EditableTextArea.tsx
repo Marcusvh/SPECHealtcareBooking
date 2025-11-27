@@ -35,7 +35,7 @@ export const EditableTextArea: React.FC<EditableTextAreaProps> = ({ value, onSav
       {isEditing ? (
         <div className="w-full">
           <textarea
-            className="w-full border border-gray-300 rounded-lg p-2 bg-white"
+            className="w-full min-h-[10vh] border border-gray-300 rounded-lg p-2 bg-white"
             value={text}
             onChange={(e) => setText(e.target.value)}
             rows={4}
@@ -56,11 +56,11 @@ export const EditableTextArea: React.FC<EditableTextAreaProps> = ({ value, onSav
           </div>
         </div>
       ) : (
-        <p className="text-gray-700">
+        <div className="w-full min-h-[10vh]">
           {value && value.trim() !== "" ? 
-            (<textarea className="w-full border border-gray-300 rounded-lg p-2 bg-gray-50" value={value} disabled={true} />)
+            (<textarea className="w-full h-full border border-gray-300 rounded-lg p-2 bg-gray-50" value={value} disabled={true} />)
             : "None"}
-        </p>
+        </div>
       )}
     </div>
   );

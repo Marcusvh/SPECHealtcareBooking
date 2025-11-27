@@ -42,7 +42,7 @@ export const StaffBookingConfirmation: React.FC = () => {
         setSelectedBookingView(relatedBooking);
       }
     }}, [activeNotification, bookingViewNeedAction]);
-    
+
     // Handlers
     const setActiveNotificationHandler = (notification: Notify) => {
       markRead(notification.notifyStaffId);
@@ -62,9 +62,8 @@ export const StaffBookingConfirmation: React.FC = () => {
     // Actions
     const rejectBooking = async (bookingId: string, notifyStaffId: string, reason?: string) => {
       await apiRequest(`Booking/booking/id/${bookingId}/reject/staffId/${notifyStaffId}`, "PATCH", reason )
-      .then((data) => {
+      .then(() => {
         console.log("Booking rejected");
-        console.log(data);
         if(reason) {
           bookingViewNeedAction.find(bv => bv.detailedBookingViewid === bookingId)!.staffNotes = reason;
         }
@@ -76,7 +75,7 @@ export const StaffBookingConfirmation: React.FC = () => {
     const confirmBooking = async (bookingId: string, notifyStaffId: string) => {
       await apiRequest(`Booking/booking/id/${bookingId}/confirm/staffId/${notifyStaffId}`, "PATCH")
       .then(() => {
-        console.log("Booking confirmed for bookingId: " + bookingId);
+        
       })
       .catch((error) => {
         console.error("Error confirming booking:", error);

@@ -38,6 +38,7 @@ namespace HealthcareBookingAPI.Managers
         {
             return await _context.NotifyStaffs
                 .AsNoTracking()
+                .Where(o => o.NeedsAction == true)
                 .OrderBy(o => o.CreatedAt)
                 .ToListAsync();
         }
@@ -46,6 +47,7 @@ namespace HealthcareBookingAPI.Managers
         {
             return await _context.NotifyStaffs
                 .AsNoTracking()
+                .Where(o => o.NeedsAction == true)
                 .OrderBy(o => o.CreatedAt)
                 .Where(n => n.StaffId == staffId)
                 .ToListAsync();
@@ -61,6 +63,34 @@ namespace HealthcareBookingAPI.Managers
             _context.NotifyStaffs.Update(notifyStaff);
             await _context.SaveChangesAsync();
             return ResultResponse<NotifyStaff>.Success(notifyStaff);
+        }
+        public async Task<ResultResponse<NotifyPatient>> CreateNotificationForPatientAsync(NotifyPatient notifyPatient)
+        {
+            if (notifyPatient == null)
+                return ResultResponse<NotifyPatient>.Fail("The notify content may not be null");
+
+            Patient? patient = await _context.Patients.FindAsync(notifyPatient.PatientId);
+            if (patient == null)
+                return ResultResponse<NotifyPatient>.Fail($"Could not find the patient with given ID: {notifyPatient.PatientId}");
+
+            Booking? booking = await _context.Bookings.FindAsync(notifyPatient.BookingId);
+            if (booking == null)
+                return ResultResponse<NotifyPatient>.Fail($"Could not find the booking with given ID: {notifyPatient.BookingId}");
+
+            _context.NotifyPatients.Add(notifyPatient);
+            await _context.SaveChangesAsync();
+            return ResultResponse<NotifyPatient>.Success(notifyPatient);
+        }
+        public async Task UpdateNotityStaffNeedsActionAsync(Guid bookingId, bool needsAction) // TODO: feels to static 
+        {
+            List<NotifyStaff> notifications = await _context.NotifyStaffs
+                .Where(n => n.RelatedBookingId == bookingId)
+                .ToListAsync();
+            foreach (var notification in notifications)
+            {
+                notification.NeedsAction = needsAction;
+            }
+            await _context.SaveChangesAsync();
         }
     }
 }

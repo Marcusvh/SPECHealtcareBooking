@@ -85,7 +85,7 @@ const BookingDetails: React.FC<Props> = ({ booking, needsAction = true, onConfir
           {booking?.patientNotes ? (
             <textarea
               disabled={true}
-              className="mt-2 w-full border border-gray-300 rounded-lg p-2 bg-gray-50"
+              className="mt-2 w-full min-h-[10vh] border border-gray-300 rounded-lg p-2 bg-gray-50"
               readOnly
               value={booking.patientNotes}
             />

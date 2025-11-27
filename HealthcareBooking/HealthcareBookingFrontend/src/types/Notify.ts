@@ -8,4 +8,5 @@ export interface Notify {
     relatedBooking: null | any;
     staffId: string;
     staff: null | any;    
+    needsAction: boolean;
 }

@@ -7,7 +7,7 @@ public class NotifyPatientConfiguration : IEntityTypeConfiguration<NotifyPatient
     public void Configure(EntityTypeBuilder<NotifyPatient> builder)
     {
         // Table name
-        builder.ToTable("NotifyPatient");
+        builder.ToTable("NotifyPatients");
 
         // Primary key
         builder.HasKey(n => n.PatientNotificationId);
@@ -28,9 +28,6 @@ public class NotifyPatientConfiguration : IEntityTypeConfiguration<NotifyPatient
         builder.Property(n => n.Subject)
             .HasMaxLength(200);
 
-        builder.Property(n => n.ErrorDetails)
-            .HasMaxLength(1000);
-
         // Enum conversions (stored as strings for readability)
         builder.Property(n => n.ContactChannelUsed)
             .HasConversion<string>()
@@ -47,7 +44,6 @@ public class NotifyPatientConfiguration : IEntityTypeConfiguration<NotifyPatient
             .HasMaxLength(50)
             .IsRequired();
 
-        // Optional: add indexes for performance
         builder.HasIndex(n => n.PatientId);
         builder.HasIndex(n => n.BookingId);
         builder.HasIndex(n => n.NotificationReason);

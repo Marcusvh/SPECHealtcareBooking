@@ -185,7 +185,8 @@ namespace HealthcareBookingAPI.Managers
             try
             {
                 await _context.SaveChangesAsync();
-                return ResultResponse<Guid>.Success(booking.BookingId);
+
+                return ResultResponse<Guid>.Success(booking.PatientId); // to use for notify patient
             }
             catch (Exception ex)
             {
@@ -209,12 +210,14 @@ namespace HealthcareBookingAPI.Managers
             try
             {
                 await _context.SaveChangesAsync();
-                return ResultResponse<Guid>.Success(booking.BookingId);
+
+                return ResultResponse<Guid>.Success(booking.PatientId); // to use for notify patient
             }
             catch (Exception ex)
             {
                 return ResultResponse<Guid>.Fail($"Error rejecting booking: {ex.Message}");
             }
         }
+        
     }
 }

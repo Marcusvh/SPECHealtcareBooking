@@ -19,7 +19,11 @@ public class NotifyStaffConfiguration : IEntityTypeConfiguration<NotifyStaff>
 
         builder.Property(ns => ns.CreatedAt)
             .IsRequired();
-            
+
+        builder.Property(ns => ns.NeedsAction)
+            .HasDefaultValue(true)
+            .IsRequired();
+
         builder.Property(ns => ns.NotificationStatus)
             .HasConversion<string>()
             .IsRequired();

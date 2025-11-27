@@ -89,6 +89,7 @@ namespace HealthcareBookingAPI.Controllers
                 Message = "A new booking has been created.",
                 NotificationType = NotificationType.BookingCreated,
                 NotificationStatus = NotificationStatus.Sent,
+                NeedsAction = true,
                 CreatedAt = DateTime.UtcNow
             };
             await _notify.CreateNotificationForStaffAsync(notify);
@@ -127,26 +128,52 @@ namespace HealthcareBookingAPI.Controllers
         [HttpPatch("booking/id/{bookingId}/confirm/staffId/{staffId}")]
         [ProducesResponseType(typeof(Guid), StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Guid>> ConfirmBookingByStaff(Guid bookingId, Guid staffId)
+        public async Task<ActionResult> ConfirmBookingByStaff(Guid bookingId, Guid staffId)
         {
             var result = await _manager.ConfirmBookingByStaffAsync(bookingId, staffId);
             if (!result.IsSuccess)
             {
                 return BadRequest(result.Error);
             }
+
+            await _notify.UpdateNotityStaffNeedsActionAsync(bookingId, false);
+
+            await _notify.CreateNotificationForPatientAsync(new NotifyPatient() // TODO: if i were to have the time i, would make this proper and actually make it dynamic
+            {
+                PatientId = result.Value,
+                BookingId = bookingId,
+                ContactChannelUsed = ContactMethod.Email,
+                NotificationStatus = NotificationStatus.Sent,
+                NotificationReason = NotificationReason.AppointmentConfirmation,
+                Subject = "Your appointment has been confirmed",
+                CreatedAt = DateTime.UtcNow
+            });
             return NoContent();
         }
         [HttpPatch("booking/id/{bookingId}/reject/staffId/{staffId}")]
         [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Guid>> RejectBookingByStaff(Guid bookingId, Guid staffId, [FromBody] string? reason)
+        public async Task<ActionResult> RejectBookingByStaff(Guid bookingId, Guid staffId, [FromBody] string? reason)
         {
             var result = await _manager.RejectBookingByStaffAsync(bookingId, staffId, reason);
             if (!result.IsSuccess)
             {
                 return BadRequest(result.Error);
             }
-            return Ok(result.Value);
+
+            await _notify.UpdateNotityStaffNeedsActionAsync(bookingId, false);
+
+            await _notify.CreateNotificationForPatientAsync(new NotifyPatient() // TODO: if i were to have the time i, would make this proper and actually make it dynamic
+            {
+                PatientId = result.Value,
+                BookingId = bookingId,
+                ContactChannelUsed = ContactMethod.Email,
+                NotificationStatus = NotificationStatus.Sent,
+                NotificationReason = NotificationReason.AppointmentCancellation,
+                Subject = "Your appointment has been rejected",
+                CreatedAt = DateTime.UtcNow
+            });
+            return NoContent();
         }
     }
 }

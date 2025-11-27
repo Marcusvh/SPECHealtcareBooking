@@ -28,7 +28,8 @@ namespace HealthcareModels.Models.HealthcareStaff
         public NotificationStatus NotificationStatus { get; set; }
         public NotificationType NotificationType { get; set; }
         public DateTime CreatedAt { get; set; }
-        
+        public bool NeedsAction { get; set; }
+
         public Guid RelatedBookingId { get; set; }
         public Booking RelatedBooking { get; set; }
         public Guid StaffId { get; set; }

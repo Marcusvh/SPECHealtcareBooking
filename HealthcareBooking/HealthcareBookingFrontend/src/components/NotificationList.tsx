@@ -30,35 +30,4 @@ const NotificationList: React.FC<Props> = ({ notifications, activeId, onSelect }
   );
 };
 
-export default NotificationList;
-
-// export const GetExternal = async (url: string, tutorial:string) => {
-//   try {
-//     const res = await fetch(url + tutorial);
-//     const data = await res.json();
-//     return data;
-//   } catch (error) {
-//     console.error("Error fetching external data:", error);
-//     throw error;
-//   }
-//  }
-// class ExternalApi {
-//   fecthData = async (url: string) => {
-//     try {
-//       const res = await GetExternal(url, "react-tutorial");
-//       return {res}
-//     } catch (error) {
-//       console.error("Error in fetchData:", error);
-//       throw error;
-//     }
-//   }
-
-//   render() {
-//     const htmlString: any = this.fecthData("https://api.sampleapis.com/tutorials/").then((result) => {
-
-//     })
-//     return (
-//       <div dangerouslySetInnerHTML={{ __html: htmlString }} />
-//     );
-//   }
-// }
+export default NotificationList;  

@@ -3,13 +3,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace HealthcareModels.Models
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum NotificationReason
     {
         AppointmentReminder,
+        AppointmentConfirmation,
         AppointmentCancellation,
         AppointmentReschedule,
         GeneralUpdate
@@ -23,7 +26,6 @@ namespace HealthcareModels.Models
         public NotificationStatus NotificationStatus { get; set; }
         public NotificationReason NotificationReason { get; set; }
         public DateTime CreatedAt { get; set; }
-        public string? ErrorDetails { get; set; }
         public string? Subject { get; set; }
     }
 }
